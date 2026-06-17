@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ModifAI · Crédits & usages</title>
+<title>ModifAI · Crédits & rentabilité</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
@@ -17,6 +17,8 @@ body{margin:0;background:#f1f5f9;color:#1e293b;font-family:ui-sans-serif,system-
 .brand{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
 .brand b{color:#fff;font-size:14px;letter-spacing:-.01em}
 .brand .sub{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:#a5b4fc}
+.cols{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:1024px){.cols{grid-template-columns:1fr 300px}}
 .panel{border:1px solid rgba(51,65,85,.6);background:rgba(30,41,59,.4);border-radius:10px;padding:12px}
 .panel-h{display:flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:10px}
 .params{display:flex;flex-wrap:wrap;gap:14px 36px}
@@ -29,6 +31,17 @@ body{margin:0;background:#f1f5f9;color:#1e293b;font-family:ui-sans-serif,system-
 .num:focus{outline:none;border-color:#818cf8;box-shadow:0 0 0 1px #818cf8}
 .suf{margin-left:4px;font-size:11px;color:#94a3b8;font-family:ui-monospace,monospace}
 .inline{display:inline-flex;align-items:center}
+.kpi-row{margin-bottom:8px}
+.kpi-row .l{display:flex;align-items:baseline;justify-content:space-between}
+.kpi-row .lab{font-size:11px;color:#94a3b8;font-family:ui-monospace,monospace}
+.kpi-row .val{font-size:18px;font-weight:700;font-family:ui-monospace,monospace}
+.bar{position:relative;height:6px;margin-top:4px;border-radius:999px;background:#334155;overflow:hidden}
+.bar .fill{position:absolute;top:0;bottom:0;left:0}
+.bar .tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(203,213,225,.75)}
+.good{color:#34d399}.goodbg{background:#10b981}
+.bad{color:#fb7185}.badbg{background:#f43f5e}
+.renta-link{display:inline-block;margin-top:10px;padding-top:8px;border-top:1px solid rgba(51,65,85,.6);font-size:10px;color:#a5b4fc;text-decoration:none}
+.renta-link:hover{color:#c7d2fe;text-decoration:underline}
 .tip{position:relative;display:inline-flex;align-items:center;margin-left:4px;vertical-align:middle;cursor:help}
 .tip .ic{width:12px;height:12px;color:#94a3b8}
 .tip:hover .ic{color:#818cf8}
@@ -80,7 +93,9 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 <script type="text/babel" data-presets="react">
 const { useState, useMemo, Fragment } = React;
 
-// Crédits par action. Familles image/audio : valeur figée. Familles vidéo : crédits par seconde (cps), arrondi sup sur durée.
+const SHEET = "https://docs.google.com/spreadsheets/d/13I_UlYHS-7lkY8EYRTVDDSLYXuLXG1MdqzkM-RrX1QQ/edit";
+
+// Crédits par action. Image/audio : valeur figée. Vidéo : crédits par seconde, arrondi sup sur durée.
 const CAT = [
   { f: "Remove Background", g: "quick", cr: 5 },
   { f: "Expand Image", g: "quick", cr: 31 },
@@ -124,8 +139,18 @@ const SEED = {
   "Video Generator — High": [2,0,1,0,0,0,0], "Video Generator — Ultra High": [1,0,0,0,0,0,0],
 };
 
+// Rentabilité pré-agrégée : Mt = K[t] - somme( COEFF[t][plan] * volume_plan^2 ).
+// Coefficients composites : aucune donnée brute (prix, répartition, breakage, hypothèses) n'est exposée.
+const K = { M0: 0.7903333333333334, M2: 1.08, M12: 2 };
+const COEFF = {
+  M0:  { T: 1.3894736842105265e-8, E: 3.6300000000000006e-11, P: 3.267e-10,            S: 1.037142857142857e-11 },
+  M2:  { T: 1.3894736842105265e-8, E: 5.346000000000001e-11,  P: 4.811400000000001e-10, S: 1.527428571428571e-11 },
+  M12: { T: 1.3894736842105265e-8, E: 7.310970814416789e-11,  P: 6.579873732975109e-10, S: 2.088848804119082e-11 },
+};
+
 const fInt = (n) => (isFinite(n) ? Math.round(n).toLocaleString("fr-FR") : "—");
 const fPct = (n) => (isFinite(n) ? Math.round(n * 100).toLocaleString("fr-FR") + " %" : "—");
+const fMul = (n) => (isFinite(n) ? n.toFixed(2).replace(".", ",") + "×" : "—");
 
 const PLAN_KEYS = ["T", "E", "P", "S"];
 const PLAN_LABEL = { T: "Trial", E: "Essential", P: "Premium", S: "Studio" };
@@ -151,6 +176,10 @@ function creditsFor(c, dur) {
   if (c.vu) return Math.ceil(c.vu * dur.upscale);
   return c.cr;
 }
+function multiple(t, a) {
+  const c = COEFF[t];
+  return K[t] - (c.T * a.T * a.T + c.E * a.E * a.E + c.P * a.P * a.P + c.S * a.S * a.S);
+}
 
 function App() {
   const [alloc, setAlloc] = useState({ E: 4000, P: 13000, S: 26000, T: 2000 });
@@ -160,25 +189,39 @@ function App() {
 
   const credits = useMemo(() => { const m = {}; CAT.forEach((c) => (m[c.f] = creditsFor(c, dur))); return m; }, [dur]);
   const totals = useMemo(() => SCEN.map((s, i) => CAT.reduce((sum, c) => sum + (qty[c.f][i] || 0) * credits[c.f], 0)), [qty, credits]);
+  const mult = useMemo(() => ({ M0: multiple("M0", alloc), M2: multiple("M2", alloc), M12: multiple("M12", alloc) }), [alloc]);
   const setQ = (f, i, v) => setQty((p) => ({ ...p, [f]: p[f].map((x, j) => (j === i ? (v === "" ? 0 : parseFloat(v)) : x)) }));
 
   return <div>
     <div className="console"><div className="console-inner">
-      <div className="brand"><b>ModifAI</b><span className="sub">Crédits &amp; usages</span></div>
-      <div className="panel">
-        <div className="panel-h"><IcSliders style={{width:14,height:14}}/> Paramètres pilotables</div>
-        <div className="params">
-          <div>
-            <div className="prow-h">Volumes crédits par plan <Tip text="Crédits alloués par plan sur un cycle. Pilotent le nombre d'actions possibles et le remplissage des scénarios." /></div>
-            <div className="minis">{PLAN_KEYS.map((k) => <Mini key={k} t={PLAN_LABEL[k]}><Num value={alloc[k]} step={500} onChange={(v) => setAlloc((p) => ({ ...p, [k]: v }))} /></Mini>)}</div>
-          </div>
-          <div>
-            <div className="prow-h">Durées réf. vidéo <Tip text="Durée de référence d'une action vidéo. Pilote le coût en crédits des familles Video Generator et Upscale Video." /></div>
-            <div className="minis">
-              <Mini t="Génération"><Num value={dur.gen} suffix="s" sm onChange={(v) => setDur((p) => ({ ...p, gen: v }))} /></Mini>
-              <Mini t="Upscale"><Num value={dur.upscale} suffix="s" sm onChange={(v) => setDur((p) => ({ ...p, upscale: v }))} /></Mini>
+      <div className="brand"><b>ModifAI</b><span className="sub">Crédits &amp; rentabilité</span></div>
+      <div className="cols">
+        <div className="panel">
+          <div className="panel-h"><IcSliders style={{width:14,height:14}}/> Paramètres pilotables</div>
+          <div className="params">
+            <div>
+              <div className="prow-h">Volumes crédits par plan <Tip text="Crédits alloués par plan sur un cycle. Pilotent le nombre d'actions possibles, le remplissage des scénarios et la rentabilité." /></div>
+              <div className="minis">{PLAN_KEYS.map((k) => <Mini key={k} t={PLAN_LABEL[k]}><Num value={alloc[k]} step={500} onChange={(v) => setAlloc((p) => ({ ...p, [k]: v }))} /></Mini>)}</div>
+            </div>
+            <div>
+              <div className="prow-h">Durées réf. vidéo <Tip text="Durée de référence d'une action vidéo. Pilote le coût en crédits des familles Video Generator et Upscale Video." /></div>
+              <div className="minis">
+                <Mini t="Génération"><Num value={dur.gen} suffix="s" sm onChange={(v) => setDur((p) => ({ ...p, gen: v }))} /></Mini>
+                <Mini t="Upscale"><Num value={dur.upscale} suffix="s" sm onChange={(v) => setDur((p) => ({ ...p, upscale: v }))} /></Mini>
+              </div>
             </div>
           </div>
+        </div>
+        <div className="panel">
+          <div className="panel-h">Rentabilité <Tip text="Multiple net par euro investi en acquisition, rentable au-dessus de 1,00×. Réagit aux volumes crédits. Détail du modèle et hypothèses dans la calculatrice Dotworld." /></div>
+          {["M0", "M2", "M12"].map((h) => {
+            const v = mult[h], ok = v >= 1, w = Math.max(2, Math.min(100, (v / 2.5) * 100));
+            return <div className="kpi-row" key={h}>
+              <div className="l"><span className="lab">Multiple net {h}</span><span className={"val " + (ok ? "good" : "bad")}>{fMul(v)}</span></div>
+              <div className="bar"><div className={"fill " + (ok ? "goodbg" : "badbg")} style={{ width: w + "%" }} /><div className="tick" style={{ left: (1 / 2.5 * 100) + "%" }} /></div>
+            </div>;
+          })}
+          <a className="renta-link" href={SHEET} target="_blank" rel="noopener">Détail du modèle · calculatrice Dotworld ↗</a>
         </div>
       </div>
     </div></div>
@@ -190,7 +233,7 @@ function App() {
       </div>
       {tab === "equiv" ? <Equiv credits={credits} alloc={alloc} /> : <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} />}
     </div>
-    <div className="foot">ModifAI · équivalences crédits par action et scénarios d'usage. Volumes et durées pilotables ci-dessus.</div>
+    <div className="foot">ModifAI · équivalences crédits, scénarios d'usage et impact rentabilité. Volumes et durées pilotables ci-dessus.</div>
   </div>;
 }
 
