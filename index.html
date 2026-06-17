@@ -320,15 +320,15 @@ function App() {
         <button className={"tab" + (tab === "scen" ? " active" : "")} onClick={() => setTab("scen")}><IcBoxes style={{width:16,height:16}}/> Scénarios d'usage</button>
       </div>
       {tab === "equiv"
-        ? <Equiv credits={credits} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} />
+        ? <Equiv credits={credits} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} consoleH={consoleH} />
         : <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} consoleH={consoleH} resetQty={resetQty} />}
     </div>
     <div className="pagefoot"></div>
   </div>;
 }
 
-function Equiv({ credits, alloc, dur, setDur, open, toggle }) {
-  return <div className="card scrollx"><table>
+function Equiv({ credits, alloc, dur, setDur, open, toggle, consoleH }) {
+  return <div className="stickyhead"><table style={{ ["--ch"]: consoleH + "px" }}>
     <thead><tr><th className="l">Action</th><th>Crédits / action</th>
       {PLAN_KEYS.map((k) => <th key={k}>{PLAN_LABEL[k]}<div className="sub2">{fInt(alloc[k])} cr.</div></th>)}</tr></thead>
     <tbody>
