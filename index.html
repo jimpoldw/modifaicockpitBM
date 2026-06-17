@@ -120,6 +120,7 @@ thead .sticky-l,tfoot .sticky-l{background:#f8fafc}
 .pagefoot{max-width:1280px;margin:0 auto;padding:32px 16px 88px}
 tfoot .scenhead td{font-size:10px;color:#64748b;text-align:right;white-space:nowrap;padding:6px 16px;font-weight:600}
 tfoot .scenhead .sticky-l{background:#fff}
+tfoot .profcell{text-align:right;font-size:10px;font-weight:600;color:#64748b;white-space:nowrap;padding:6px 16px;background:#f1f5f9;border-top:1px solid #e2e8f0}
 input[type=number]{-moz-appearance:textfield}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 @media(max-width:1023px){
@@ -187,6 +188,7 @@ const SCEN = [
   { k:"mixB", label:"Mix B · régulier", desc:"Usage régulier, volumes moyens" },
   { k:"mixC", label:"Mix C · intensif", desc:"Usage intensif, gros volumes" },
 ];
+const SCEN_SHORT = ["Full vidéo","Full image","Full génératif","Full quick","Mix Léger","Mix Régulier","Mix Intensif"];
 const SEED = {
   "Remove Background": [0,0,0,200,60,80,100], "Expand Image": [0,0,0,40,10,20,30],
   "Colorize Image": [0,0,0,40,10,15,20], "Vectorize Image": [0,0,0,20,5,8,10],
@@ -375,7 +377,11 @@ function Scenarios({ credits, qty, setQ, totals, alloc, dur, setDur, open, toggl
       <tfoot>
         <tr className="tot"><td className="l sticky-l">Total crédits / mois consommés</td><td></td>
           {totals.map((t, i) => <td key={i} className="mono">{fInt(t)}</td>)}</tr>
-        <tr><td className="footlabel" colSpan={ncol}>Remplissage du quota mensuel par plan</td></tr>
+        <tr>
+          <td className="footlabel sticky-l" style={{background:"#f1f5f9"}}>Remplissage du quota mensuel par plan</td>
+          <td className="profcell"></td>
+          {SCEN.map((s, i) => <td key={s.k} className="profcell">{SCEN_SHORT[i]}</td>)}
+        </tr>
         {[["E","Essential"],["P","Premium"],["S","Studio"]].map(([k,lab]) => <tr key={k}>
           <td className="l sticky-l" style={{fontSize:12}}>{lab} <span className="mono" style={{color:"#94a3b8"}}>({fInt(alloc[k])} cr)</span></td><td className="gcol"></td>
           {totals.map((t,i) => { const p = t / alloc[k]; return <td key={i} className={"pct " + pctClass(p)}>{fPct(p)}</td>; })}
