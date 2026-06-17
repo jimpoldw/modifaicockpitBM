@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ModifAI · Crédits & rentabilité</title>
+<title>ModifAI · Arbitrage crédits</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
@@ -18,16 +18,15 @@ body{margin:0;background:#f1f5f9;color:#1e293b;font-family:ui-sans-serif,system-
 .brand b{color:#fff;font-size:14px;letter-spacing:-.01em}
 .brand .sub{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:#a5b4fc}
 .cols{display:grid;grid-template-columns:1fr;gap:16px}
-@media(min-width:1024px){.cols{grid-template-columns:1fr 300px}}
+@media(min-width:1024px){.cols{grid-template-columns:max-content 1fr}}
 .panel{border:1px solid rgba(51,65,85,.6);background:rgba(30,41,59,.4);border-radius:10px;padding:12px}
-.panel-h{display:flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:10px}
+.panel-h{display:flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:18px}
 .params{display:flex;flex-wrap:wrap;gap:14px 36px}
 .prow-h{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#cbd5e1;margin-bottom:6px;display:flex;align-items:center}
 .minis{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
 .mini{display:flex;flex-direction:column;align-items:flex-start}
 .mini>span{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:#64748b;margin-bottom:2px}
 .num{width:80px;background:rgba(30,41,59,.8);border:1px solid #334155;border-radius:4px;padding:4px 6px;text-align:right;font-size:13px;color:#f1f5f9;font-family:ui-monospace,monospace}
-.num.sm{width:60px}
 .num:focus{outline:none;border-color:#818cf8;box-shadow:0 0 0 1px #818cf8}
 .suf{margin-left:4px;font-size:11px;color:#94a3b8;font-family:ui-monospace,monospace}
 .inline{display:inline-flex;align-items:center}
@@ -35,17 +34,32 @@ body{margin:0;background:#f1f5f9;color:#1e293b;font-family:ui-sans-serif,system-
 .kpi-row .l{display:flex;align-items:baseline;justify-content:space-between}
 .kpi-row .lab{font-size:11px;color:#94a3b8;font-family:ui-monospace,monospace}
 .kpi-row .val{font-size:18px;font-weight:700;font-family:ui-monospace,monospace}
+.kpi-row .tgt{color:#94a3b8;font-size:10px;font-weight:400;margin-left:6px}
 .bar{position:relative;height:6px;margin-top:4px;border-radius:999px;background:#334155;overflow:hidden}
 .bar .fill{position:absolute;top:0;bottom:0;left:0}
-.bar .tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(203,213,225,.75)}
+.bar .target{position:absolute;top:-2px;bottom:-2px;width:2px;border-radius:1px;background:#e2e8f0;box-shadow:0 0 0 1px rgba(15,23,42,.45)}
 .good{color:#34d399}.goodbg{background:#10b981}
 .bad{color:#fb7185}.badbg{background:#f43f5e}
-.renta-link{display:inline-block;margin-top:10px;padding-top:8px;border-top:1px solid rgba(51,65,85,.6);font-size:10px;color:#a5b4fc;text-decoration:none}
+.renta-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.renta-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;display:inline-flex;align-items:center}
+.renta-tiles{display:flex;gap:10px}
+.rtile{flex:1;min-width:0}
+.rcard{flex:1;min-width:0;border-radius:8px;padding:8px 12px;background:rgba(15,23,42,.5);border-left:3px solid transparent}
+.rcard .rlabel{font-size:10px;color:#94a3b8;font-family:ui-monospace,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rcard .rvalue{font-size:20px;font-weight:700;font-family:ui-monospace,monospace;line-height:1.2;margin-top:2px}
+.rcard.good{border-left-color:#10b981}.rcard.good .rvalue{color:#34d399}
+.rcard.warn{border-left-color:#f59e0b}.rcard.warn .rvalue{color:#fbbf24}
+.rcard.bad{border-left-color:#f43f5e}.rcard.bad .rvalue{color:#fb7185}
+.gcol{background:#f8fafc}
+.rtop{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:10px;color:#94a3b8;font-family:ui-monospace,monospace;white-space:nowrap}
+.rtop .tgt{margin-left:4px}
+.rval{font-size:17px;font-weight:700;font-family:ui-monospace,monospace;line-height:1.2;margin-top:1px}
+.renta-link{font-size:10px;color:#a5b4fc;text-decoration:none;white-space:nowrap;flex:none}
 .renta-link:hover{color:#c7d2fe;text-decoration:underline}
 .tip{position:relative;display:inline-flex;align-items:center;margin-left:4px;vertical-align:middle;cursor:help}
 .tip .ic{width:12px;height:12px;color:#94a3b8}
 .tip:hover .ic{color:#818cf8}
-.tip .pop{position:absolute;left:0;bottom:100%;margin-bottom:6px;width:230px;z-index:60;background:#0f172a;border:1px solid #334155;color:#e2e8f0;font-size:11px;line-height:1.45;font-weight:400;text-transform:none;letter-spacing:normal;padding:8px 10px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .12s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.tip .pop{position:absolute;left:0;top:100%;margin-top:6px;width:230px;z-index:60;background:#0f172a;border:1px solid #334155;color:#e2e8f0;font-size:11px;line-height:1.45;font-weight:400;text-transform:none;letter-spacing:normal;padding:8px 10px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .12s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .tip:hover .pop{opacity:1}
 .tabs{display:flex;gap:4px;margin:20px 0 16px}
 .tab{display:flex;align-items:center;gap:6px;padding:8px 16px;font-size:14px;font-weight:500;color:#64748b;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;border-radius:8px 8px 0 0}
@@ -61,29 +75,51 @@ tbody td{padding:8px 16px;text-align:right}
 tbody td.l{text-align:left;color:#334155;white-space:nowrap}
 tbody tr{border-top:1px solid #f1f5f9}
 tbody tr:hover{background:#f8fafc}
-.grp td{background:rgba(238,242,255,.7);color:#4338ca;font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:6px 16px;text-align:left}
+.grp{cursor:pointer;user-select:none}
+.grp td{background:rgba(238,242,255,.7);color:#4338ca;text-align:left;padding:8px 16px}
+.grp:hover td{background:rgba(224,231,255,.9)}
+.grp-h{display:inline-flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.chev{width:14px;height:14px;color:#6366f1;transition:transform .15s;flex:none}
+.chev.open{transform:rotate(90deg)}
+.grp-dur{display:inline-flex;align-items:center;gap:5px;margin-left:14px;font-size:10px;text-transform:none;letter-spacing:normal;color:#64748b;font-weight:400}
+.durin{width:48px;background:#fff;border:1px solid #c7d2fe;border-radius:4px;padding:2px 4px;text-align:right;font-family:ui-monospace,monospace;font-size:12px;color:#1e293b}
+.durin:focus{outline:none;border-color:#6366f1}
 tfoot .tot td{border-top:2px solid #cbd5e1;background:#f8fafc;font-weight:600;color:#0f172a}
 tfoot td{padding:8px 16px;text-align:right}
 tfoot td.l{text-align:left;color:#64748b}
+tfoot .footlabel{text-align:left;color:#475569;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:#f1f5f9;border-top:1px solid #e2e8f0}
 .pct{font-family:ui-monospace,monospace;font-size:12px}
 .ok{background:#ecfdf5;color:#047857}
 .warn{background:#fffbeb;color:#b45309}
 .over{background:#fff1f2;color:#be123c}
-.qty{width:56px;background:transparent;border:1px solid transparent;border-radius:4px;padding:2px 4px;text-align:right;font-family:ui-monospace,monospace;color:#334155;font-size:13px}
+.qty{width:56px;background:transparent;border:1px solid transparent;border-radius:4px;padding:2px 4px;text-align:right;font-family:ui-monospace,monospace;font-size:13px}
+.qty.zero{color:#cbd5e1}
+.qty.pos{color:#2563eb}
 .qty:hover{border-color:#e2e8f0}
 .qty:focus{outline:none;border-color:#818cf8;box-shadow:0 0 0 1px #c7d2fe}
-.sticky-l{position:sticky;left:0;background:#fff}
+.sticky-l{position:sticky;left:0;background:#fff;z-index:2}
+.stickyhead{background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.stickyhead table{min-width:880px}
+.stickyhead thead th{position:sticky;top:var(--ch,120px);z-index:20;box-shadow:inset 0 -1px 0 #e2e8f0}
+.stickyhead thead th.l{z-index:21}
+.resetbtn{margin-left:10px;font-size:10px;font-weight:500;text-transform:none;letter-spacing:normal;color:#4f46e5;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:3px 8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;vertical-align:middle}
+.resetbtn:hover{background:#e0e7ff}
 thead .sticky-l,tfoot .sticky-l{background:#f8fafc}
+.grp .sticky-l{background:rgba(238,242,255,.7)}
+.scards-intro{font-size:12px;color:#475569;margin:0 0 10px}
 .scards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
 @media(min-width:768px){.scards{grid-template-columns:repeat(4,1fr)}}
 @media(min-width:1024px){.scards{grid-template-columns:repeat(7,1fr)}}
-.scard{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.scard .t{font-size:11px;font-weight:600;color:#334155}
-.scard .v{font-size:18px;font-weight:700;font-family:ui-monospace,monospace;color:#0f172a}
-.scard .u{font-size:10px;color:#94a3b8;margin-top:-2px}
-.scard .vd{font-size:10px;font-weight:500;margin-top:4px}
-.foot{max-width:1280px;margin:0 auto;padding:16px;font-size:11px;color:#94a3b8}
+.scard{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:11px;box-shadow:0 1px 2px rgba(0,0,0,.04);display:flex;flex-direction:column}
+.scard .t{font-size:12px;font-weight:700;color:#0f172a}
+.scard .sdesc{font-size:10px;color:#94a3b8;margin-top:3px;line-height:1.35;min-height:27px}
+.scard .v{font-size:18px;font-weight:700;font-family:ui-monospace,monospace;color:#0f172a;margin-top:6px}
+.scard .vu2{font-size:10px;color:#94a3b8;font-weight:400;font-family:ui-sans-serif,system-ui,sans-serif}
+.scard .vd{font-size:11px;font-weight:600;margin-top:6px;padding-top:6px;border-top:1px solid #f1f5f9}
 .legend{font-size:11px;color:#94a3b8;margin-top:8px}
+.pagefoot{max-width:1280px;margin:0 auto;padding:32px 16px 88px}
+tfoot .scenhead td{font-size:10px;color:#64748b;text-align:right;white-space:nowrap;padding:6px 16px;font-weight:600}
+tfoot .scenhead .sticky-l{background:#fff}
 input[type=number]{-moz-appearance:textfield}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 </style>
@@ -91,39 +127,52 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 <body>
 <div id="root"></div>
 <script type="text/babel" data-presets="react">
-const { useState, useMemo, Fragment } = React;
+const { useState, useMemo, useRef, useEffect, Fragment } = React;
 
 const SHEET = "https://docs.google.com/spreadsheets/d/13I_UlYHS-7lkY8EYRTVDDSLYXuLXG1MdqzkM-RrX1QQ/edit";
 
 // Crédits par action. Image/audio : valeur figée. Vidéo : crédits par seconde, arrondi sup sur durée.
 const CAT = [
-  { f: "Remove Background", g: "quick", cr: 5 },
-  { f: "Expand Image", g: "quick", cr: 31 },
-  { f: "Colorize Image", g: "quick", cr: 35 },
-  { f: "Vectorize Image", g: "quick", cr: 35 },
-  { f: "Upscale Image — Low", g: "quick", cr: 69 },
-  { f: "Upscale Image — Medium", g: "quick", cr: 138 },
-  { f: "Upscale Image — High", g: "quick", cr: 207 },
-  { f: "Upscale Video — Low", g: "quick", vu: 6.206896551724138 },
-  { f: "Upscale Video — Medium", g: "quick", vu: 12.413793103448276 },
-  { f: "Upscale Video — High", g: "quick", vu: 24.827586206896555 },
-  { f: "Generate Background", g: "gen", cr: 60 },
-  { f: "Text to Speech", g: "gen", cr: 87 },
-  { f: "Image Generator — Ultra Low", g: "gen", cr: 31 },
-  { f: "Image Generator — Low", g: "gen", cr: 61 },
-  { f: "Image Generator — Medium", g: "gen", cr: 91 },
-  { f: "Image Generator — High", g: "gen", cr: 190 },
-  { f: "Image Generator — Ultra High", g: "gen", cr: 569 },
-  { f: "Video Generator — Ultra Low", g: "gen", vg: 31.03448275862069 },
-  { f: "Video Generator — Low", g: "gen", vg: 86.20689655172414 },
-  { f: "Video Generator — Medium", g: "gen", vg: 96.55172413793105 },
-  { f: "Video Generator — High", g: "gen", vg: 172.41379310344828 },
-  { f: "Video Generator — Ultra High", g: "gen", vg: 344.82758620689657 },
+  { f:"Remove Background", sec:"retouche", label:"Remove Background", cr:5 },
+  { f:"Expand Image", sec:"retouche", label:"Expand Image", cr:31 },
+  { f:"Colorize Image", sec:"retouche", label:"Colorize Image", cr:35 },
+  { f:"Vectorize Image", sec:"retouche", label:"Vectorize Image", cr:35 },
+  { f:"Upscale Image — Low", sec:"upImg", label:"Upscale Image — Low Quality", cr:69 },
+  { f:"Upscale Image — Medium", sec:"upImg", label:"Upscale Image — Medium Quality", cr:138 },
+  { f:"Upscale Image — High", sec:"upImg", label:"Upscale Image — High Quality", cr:207 },
+  { f:"Upscale Video — Low", sec:"upVid", label:"Upscale Video — Low Quality", vu:6.206896551724138 },
+  { f:"Upscale Video — Medium", sec:"upVid", label:"Upscale Video — Medium Quality", vu:12.413793103448276 },
+  { f:"Upscale Video — High", sec:"upVid", label:"Upscale Video — High Quality", vu:24.827586206896555 },
+  { f:"Generate Background", sec:"genBg", label:"Generate Background", cr:60 },
+  { f:"Text to Speech", sec:"tts", label:"Text to Speech", cr:87 },
+  { f:"Image Generator — Ultra Low", sec:"imgGen", label:"Image Generator — Ultra Low Quality", cr:31 },
+  { f:"Image Generator — Low", sec:"imgGen", label:"Image Generator — Low Quality", cr:61 },
+  { f:"Image Generator — Medium", sec:"imgGen", label:"Image Generator — Medium Quality", cr:91 },
+  { f:"Image Generator — High", sec:"imgGen", label:"Image Generator — High Quality", cr:190 },
+  { f:"Image Generator — Ultra High", sec:"imgGen", label:"Image Generator — Ultra High Quality", cr:569 },
+  { f:"Video Generator — Ultra Low", sec:"vidGen", label:"Video Generator — Ultra Low Quality", vg:31.03448275862069 },
+  { f:"Video Generator — Low", sec:"vidGen", label:"Video Generator — Low Quality", vg:86.20689655172414 },
+  { f:"Video Generator — Medium", sec:"vidGen", label:"Video Generator — Medium Quality", vg:96.55172413793105 },
+  { f:"Video Generator — High", sec:"vidGen", label:"Video Generator — High Quality", vg:172.41379310344828 },
+  { f:"Video Generator — Ultra High", sec:"vidGen", label:"Video Generator — Ultra High Quality", vg:344.82758620689657 },
+];
+const SECTIONS = [
+  { id:"retouche", title:"Quick Tool · Retouche" },
+  { id:"upImg", title:"Quick Tool · Upscale Image" },
+  { id:"upVid", title:"Quick Tool · Upscale Video", dur:"upscale" },
+  { id:"genBg", title:"Generative Tool · Generate Background" },
+  { id:"tts", title:"Generative Tool · Text To Speech" },
+  { id:"imgGen", title:"Generative Tool · Image Generator" },
+  { id:"vidGen", title:"Generative Tool · Video Generator", dur:"gen" },
 ];
 const SCEN = [
-  { k: "fullVideo", label: "Full vidéo" }, { k: "fullImage", label: "Full image" },
-  { k: "fullGen", label: "Full génératif" }, { k: "fullQuick", label: "Full quick" },
-  { k: "mixA", label: "Mix A · léger" }, { k: "mixB", label: "Mix B · régulier" }, { k: "mixC", label: "Mix C · intensif" },
+  { k:"fullVideo", label:"Full vidéo", desc:"100% vidéo : génération et upscale" },
+  { k:"fullImage", label:"Full image", desc:"100% génération d'images" },
+  { k:"fullGen", label:"Full génératif", desc:"Tout le génératif : image, vidéo, fond, audio" },
+  { k:"fullQuick", label:"Full quick", desc:"100% quick tools de retouche" },
+  { k:"mixA", label:"Mix A · léger", desc:"Usage occasionnel, faibles volumes" },
+  { k:"mixB", label:"Mix B · régulier", desc:"Usage régulier, volumes moyens" },
+  { k:"mixC", label:"Mix C · intensif", desc:"Usage intensif, gros volumes" },
 ];
 const SEED = {
   "Remove Background": [0,0,0,200,60,80,100], "Expand Image": [0,0,0,40,10,20,30],
@@ -139,14 +188,14 @@ const SEED = {
   "Video Generator — High": [2,0,1,0,0,0,0], "Video Generator — Ultra High": [1,0,0,0,0,0,0],
 };
 
-// Rentabilité pré-agrégée : Mt = K[t] - somme( COEFF[t][plan] * volume_plan^2 ).
-// Coefficients composites : aucune donnée brute (prix, répartition, breakage, hypothèses) n'est exposée.
 const K = { M0: 0.7903333333333334, M2: 1.08, M12: 2 };
 const COEFF = {
   M0:  { T: 1.3894736842105265e-8, E: 3.6300000000000006e-11, P: 3.267e-10,            S: 1.037142857142857e-11 },
   M2:  { T: 1.3894736842105265e-8, E: 5.346000000000001e-11,  P: 4.811400000000001e-10, S: 1.527428571428571e-11 },
   M12: { T: 1.3894736842105265e-8, E: 7.310970814416789e-11,  P: 6.579873732975109e-10, S: 2.088848804119082e-11 },
 };
+const THRESH = { M0: { g: 0.5, y: 0.4 }, M2: { g: 0.95, y: 0.85 }, M12: { g: 1.9, y: 1.75 } };
+function rclass(h, v) { const t = THRESH[h]; return v >= t.g ? "good" : v >= t.y ? "warn" : "bad"; }
 
 const fInt = (n) => (isFinite(n) ? Math.round(n).toLocaleString("fr-FR") : "—");
 const fPct = (n) => (isFinite(n) ? Math.round(n * 100).toLocaleString("fr-FR") + " %" : "—");
@@ -160,11 +209,13 @@ const IcInfo = (p) => <Svg {...p}><circle cx="12" cy="12" r="10"/><path d="M12 1
 const IcSliders = (p) => <Svg {...p}><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></Svg>;
 const IcLayers = (p) => <Svg {...p}><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></Svg>;
 const IcBoxes = (p) => <Svg {...p}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></Svg>;
+const IcChevron = (p) => <Svg {...p}><path d="m9 18 6-6-6-6"/></Svg>;
+const IcReset = (p) => <Svg {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></Svg>;
 
 function Tip({ text }) { return <span className="tip"><IcInfo className="ic" /><span className="pop">{text}</span></span>; }
-function Num({ value, onChange, step = 1, suffix, sm }) {
+function Num({ value, onChange, step = 1, suffix }) {
   return <span className="inline">
-    <input type="number" className={"num" + (sm ? " sm" : "")} value={value} step={step}
+    <input type="number" className="num" value={value} step={step}
       onChange={(e) => onChange(e.target.value === "" ? 0 : parseFloat(e.target.value))} />
     {suffix && <span className="suf">{suffix}</span>}
   </span>;
@@ -181,47 +232,69 @@ function multiple(t, a) {
   return K[t] - (c.T * a.T * a.T + c.E * a.E * a.E + c.P * a.P * a.P + c.S * a.S * a.S);
 }
 
+function SecHeader({ sec, open, onToggle, dur, setDur, colSpan }) {
+  return <tr className="grp" onClick={onToggle}>
+    <td colSpan={colSpan} className="sticky-l">
+      <span className="grp-h"><IcChevron className={"chev" + (open ? " open" : "")} />{sec.title}</span>
+      {sec.dur && <span className="grp-dur" onClick={(e) => e.stopPropagation()}>
+        durée réf
+        <input type="number" className="durin" value={dur[sec.dur]}
+          onChange={(e) => setDur((p) => ({ ...p, [sec.dur]: e.target.value === "" ? 0 : parseFloat(e.target.value) }))} /> s
+      </span>}
+    </td>
+  </tr>;
+}
+
 function App() {
   const [alloc, setAlloc] = useState({ E: 4000, P: 13000, S: 26000, T: 2000 });
   const [dur, setDur] = useState({ gen: 8, upscale: 30 });
   const [qty, setQty] = useState(() => { const o = {}; CAT.forEach((c) => (o[c.f] = SEED[c.f].slice())); return o; });
   const [tab, setTab] = useState("equiv");
+  const [open, setOpen] = useState({ retouche:true, upImg:true, upVid:true, genBg:true, tts:true, imgGen:true, vidGen:true });
+  const toggle = (id) => setOpen((p) => ({ ...p, [id]: !p[id] }));
 
   const credits = useMemo(() => { const m = {}; CAT.forEach((c) => (m[c.f] = creditsFor(c, dur))); return m; }, [dur]);
   const totals = useMemo(() => SCEN.map((s, i) => CAT.reduce((sum, c) => sum + (qty[c.f][i] || 0) * credits[c.f], 0)), [qty, credits]);
   const mult = useMemo(() => ({ M0: multiple("M0", alloc), M2: multiple("M2", alloc), M12: multiple("M12", alloc) }), [alloc]);
   const setQ = (f, i, v) => setQty((p) => ({ ...p, [f]: p[f].map((x, j) => (j === i ? (v === "" ? 0 : parseFloat(v)) : x)) }));
+  const resetQty = () => setQty(() => { const o = {}; CAT.forEach((c) => (o[c.f] = SEED[c.f].slice())); return o; });
+  const consoleRef = useRef(null);
+  const [consoleH, setConsoleH] = useState(120);
+  useEffect(() => {
+    const el = consoleRef.current; if (!el) return;
+    const update = () => setConsoleH(el.offsetHeight);
+    update();
+    const ro = new ResizeObserver(update); ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => { ro.disconnect(); window.removeEventListener("resize", update); };
+  }, []);
 
   return <div>
-    <div className="console"><div className="console-inner">
-      <div className="brand"><b>ModifAI</b><span className="sub">Crédits &amp; rentabilité</span></div>
+    <div className="console" ref={consoleRef}><div className="console-inner">
+      <div className="brand"><b>ModifAI</b><span className="sub">Arbitrage crédits</span></div>
       <div className="cols">
         <div className="panel">
-          <div className="panel-h"><IcSliders style={{width:14,height:14}}/> Paramètres pilotables</div>
+          <div className="panel-h"><IcSliders style={{width:14,height:14}}/> Volumes crédits par plan <Tip text="Crédits alloués par plan sur un cycle. Pilotent le nombre d'actions possibles, le remplissage des scénarios et la rentabilité." /></div>
           <div className="params">
             <div>
-              <div className="prow-h">Volumes crédits par plan <Tip text="Crédits alloués par plan sur un cycle. Pilotent le nombre d'actions possibles, le remplissage des scénarios et la rentabilité." /></div>
               <div className="minis">{PLAN_KEYS.map((k) => <Mini key={k} t={PLAN_LABEL[k]}><Num value={alloc[k]} step={500} onChange={(v) => setAlloc((p) => ({ ...p, [k]: v }))} /></Mini>)}</div>
-            </div>
-            <div>
-              <div className="prow-h">Durées réf. vidéo <Tip text="Durée de référence d'une action vidéo. Pilote le coût en crédits des familles Video Generator et Upscale Video." /></div>
-              <div className="minis">
-                <Mini t="Génération"><Num value={dur.gen} suffix="s" sm onChange={(v) => setDur((p) => ({ ...p, gen: v }))} /></Mini>
-                <Mini t="Upscale"><Num value={dur.upscale} suffix="s" sm onChange={(v) => setDur((p) => ({ ...p, upscale: v }))} /></Mini>
-              </div>
             </div>
           </div>
         </div>
         <div className="panel">
-          <div className="panel-h">Rentabilité <Tip text="Multiple net par euro investi en acquisition, rentable au-dessus de 1,00×. Réagit aux volumes crédits. Détail du modèle et hypothèses dans la calculatrice Dotworld." /></div>
-          {["M0", "M2", "M12"].map((h) => {
-            const v = mult[h], ok = v >= 1, w = Math.max(2, Math.min(100, (v / 2.5) * 100));
-            return <div className="kpi-row" key={h}>
-              <div className="l"><span className="lab">Multiple net {h}</span><span className={"val " + (ok ? "good" : "bad")}>{fMul(v)}</span></div>
-              <div className="bar"><div className={"fill " + (ok ? "goodbg" : "badbg")} style={{ width: w + "%" }} /><div className="tick" style={{ left: (1 / 2.5 * 100) + "%" }} /></div>
-            </div>;
-          })}
-          <a className="renta-link" href={SHEET} target="_blank" rel="noopener">Détail du modèle · calculatrice Dotworld ↗</a>
+          <div className="renta-head">
+            <span className="renta-title">Rentabilité <Tip text="Multiple net par euro investi en acquisition, par horizon. Vert : objectif atteint. Jaune : proche de l'objectif. Rouge : sous l'objectif. Réagit aux volumes crédits. Ne prend pas en compte les achats Extra Crédits qui augmenteront la rentabilité." /></span>
+            <a className="renta-link" href={SHEET} target="_blank" rel="noopener">Baseline &amp; détail ↗</a>
+          </div>
+          <div className="renta-tiles">
+            {["M0", "M2", "M12"].map((h) => {
+              const v = mult[h];
+              return <div className={"rcard " + rclass(h, v)} key={h}>
+                <div className="rlabel">Multiple net {h}</div>
+                <div className="rvalue">{fMul(v)}</div>
+              </div>;
+            })}
+          </div>
         </div>
       </div>
     </div></div>
@@ -231,22 +304,23 @@ function App() {
         <button className={"tab" + (tab === "equiv" ? " active" : "")} onClick={() => setTab("equiv")}><IcLayers style={{width:16,height:16}}/> Équivalences</button>
         <button className={"tab" + (tab === "scen" ? " active" : "")} onClick={() => setTab("scen")}><IcBoxes style={{width:16,height:16}}/> Scénarios d'usage</button>
       </div>
-      {tab === "equiv" ? <Equiv credits={credits} alloc={alloc} /> : <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} />}
+      {tab === "equiv"
+        ? <Equiv credits={credits} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} />
+        : <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} consoleH={consoleH} resetQty={resetQty} />}
     </div>
-    <div className="foot">ModifAI · équivalences crédits, scénarios d'usage et impact rentabilité. Volumes et durées pilotables ci-dessus.</div>
+    <div className="pagefoot"></div>
   </div>;
 }
 
-function Equiv({ credits, alloc }) {
-  const groups = [{ id: "quick", title: "Quick tools · retouche" }, { id: "gen", title: "Generative tools · création" }];
-  return <div className="card"><table>
+function Equiv({ credits, alloc, dur, setDur, open, toggle }) {
+  return <div className="card scrollx"><table>
     <thead><tr><th className="l">Action</th><th>Crédits / action</th>
       {PLAN_KEYS.map((k) => <th key={k}>{PLAN_LABEL[k]}<div className="sub2">{fInt(alloc[k])} cr.</div></th>)}</tr></thead>
     <tbody>
-      {groups.map((grp) => <Fragment key={grp.id}>
-        <tr className="grp"><td colSpan={6}>{grp.title}</td></tr>
-        {CAT.filter((c) => c.g === grp.id).map((c) => <tr key={c.f}>
-          <td className="l">{c.f}</td><td className="mono">{fInt(credits[c.f])}</td>
+      {SECTIONS.map((sec) => <Fragment key={sec.id}>
+        <SecHeader sec={sec} open={open[sec.id]} onToggle={() => toggle(sec.id)} dur={dur} setDur={setDur} colSpan={6} />
+        {open[sec.id] && CAT.filter((c) => c.sec === sec.id).map((c) => <tr key={c.f}>
+          <td className="l">{c.label}</td><td className="mono">{fInt(credits[c.f])}</td>
           {PLAN_KEYS.map((k) => <td key={k} className="mono" style={{color:"#475569"}}>{fInt(Math.floor(alloc[k] / credits[c.f]))}</td>)}
         </tr>)}
       </Fragment>)}
@@ -256,34 +330,46 @@ function Equiv({ credits, alloc }) {
 
 function pctClass(p) { return p <= 1 ? "ok" : p <= 1.5 ? "warn" : "over"; }
 function verdict(total, alloc) {
-  if (total <= alloc.E) return { t: "Tient dans Essential", c: "#059669" };
-  if (total <= alloc.P) return { t: "Tient dans Premium", c: "#059669" };
-  if (total <= alloc.S) return { t: "Tient dans Studio", c: "#b45309" };
-  return { t: "Déborde Studio", c: "#e11d48" };
+  if (total <= alloc.E) return { t: "Plan minimum : Essential", c: "#2563eb" };
+  if (total <= alloc.P) return { t: "Plan minimum : Premium", c: "#2563eb" };
+  if (total <= alloc.S) return { t: "Plan minimum : Studio", c: "#2563eb" };
+  return { t: "Dépasse Studio", c: "#e11d48" };
 }
-function Scenarios({ credits, qty, setQ, totals, alloc }) {
+function Scenarios({ credits, qty, setQ, totals, alloc, dur, setDur, open, toggle, consoleH, resetQty }) {
+  const ncol = 2 + SCEN.length;
   return <div>
+    <p className="scards-intro">Chaque panier correspond à un profil d'usage type, les consommations étant modifiables. Permet de matcher les profils avec les plans.</p>
     <div className="scards">{SCEN.map((s, i) => { const v = verdict(totals[i], alloc);
-      return <div className="scard" key={s.k}><div className="t">{s.label}</div><div className="v">{fInt(totals[i])}</div>
-        <div className="u">crédits / mois</div><div className="vd" style={{ color: v.c }}>{v.t}</div></div>; })}
+      return <div className="scard" key={s.k}>
+        <div className="t">{s.label}</div>
+        <div className="sdesc">{s.desc}</div>
+        <div className="v">{fInt(totals[i])} <span className="vu2">cr/mois</span></div>
+        <div className="vd" style={{ color: v.c }}>{v.t}</div>
+      </div>; })}
     </div>
-    <div className="card scrollx"><table>
-      <thead><tr><th className="l sticky-l">Action</th><th>Cr./action</th>
+    <div className="stickyhead"><table style={{ ["--ch"]: consoleH + "px" }}>
+      <thead><tr><th className="l sticky-l">Action <button className="resetbtn" onClick={resetQty} title="Remettre toutes les quantités au scénario de base"><IcReset style={{width:12,height:12}}/> Réinitialiser</button></th><th>Cr./action</th>
         {SCEN.map((s) => <th key={s.k}>{s.label}</th>)}</tr></thead>
-      <tbody>{CAT.map((c) => <tr key={c.f}>
-        <td className="l sticky-l">{c.f}</td><td className="mono" style={{color:"#94a3b8"}}>{fInt(credits[c.f])}</td>
-        {SCEN.map((s, i) => <td key={s.k}><input className="qty" type="number" value={qty[c.f][i]} onChange={(e) => setQ(c.f, i, e.target.value)} /></td>)}
-      </tr>)}</tbody>
+      <tbody>
+        {SECTIONS.map((sec) => <Fragment key={sec.id}>
+          <SecHeader sec={sec} open={open[sec.id]} onToggle={() => toggle(sec.id)} dur={dur} setDur={setDur} colSpan={ncol} />
+          {open[sec.id] && CAT.filter((c) => c.sec === sec.id).map((c) => <tr key={c.f}>
+            <td className="l sticky-l">{c.label}</td><td className="mono" style={{color:"#94a3b8"}}>{fInt(credits[c.f])}</td>
+            {SCEN.map((s, i) => <td key={s.k}><input className={"qty " + (qty[c.f][i] > 0 ? "pos" : "zero")} type="number" value={qty[c.f][i]} onChange={(e) => setQ(c.f, i, e.target.value)} /></td>)}
+          </tr>)}
+        </Fragment>)}
+      </tbody>
       <tfoot>
-        <tr className="tot"><td className="l sticky-l">Total crédits / mois</td><td></td>
+        <tr className="tot"><td className="l sticky-l">Total crédits / mois consommés</td><td></td>
           {totals.map((t, i) => <td key={i} className="mono">{fInt(t)}</td>)}</tr>
-        {[["E", "Essential"], ["P", "Premium"], ["S", "Studio"]].map(([k, lab]) => <tr key={k}>
-          <td className="l sticky-l" style={{fontSize:12}}>% de {lab} <span className="mono" style={{color:"#94a3b8"}}>({fInt(alloc[k])})</span></td><td></td>
-          {totals.map((t, i) => { const p = t / alloc[k]; return <td key={i} className={"pct " + pctClass(p)}>{fPct(p)}</td>; })}
+        <tr><td className="footlabel" colSpan={ncol}>Remplissage du quota mensuel par plan</td></tr>
+        {[["E","Essential"],["P","Premium"],["S","Studio"]].map(([k,lab]) => <tr key={k}>
+          <td className="l sticky-l" style={{fontSize:12}}>{lab} <span className="mono" style={{color:"#94a3b8"}}>({fInt(alloc[k])} cr)</span></td><td className="gcol"></td>
+          {totals.map((t,i) => { const p = t / alloc[k]; return <td key={i} className={"pct " + pctClass(p)}>{fPct(p)}</td>; })}
         </tr>)}
       </tfoot>
     </table></div>
-    <p className="legend">Vert : le panier tient dans le plan (≤ 100 %). Ambre : dépasse jusqu'à 150 %. Rouge : au-delà. Quantités éditables directement dans le tableau.</p>
+    <p className="legend">Remplissage = part du quota mensuel du plan consommée par le panier. Vert : tient dans le plan (≤ 100 %). Ambre : dépasse jusqu'à 150 %. Rouge : au-delà.</p>
   </div>;
 }
 
