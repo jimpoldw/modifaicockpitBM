@@ -24,7 +24,7 @@ body{margin:0;background:#f1f5f9;color:#1e293b;font-family:ui-sans-serif,system-
 .params{display:flex;flex-wrap:wrap;gap:14px 36px}
 .prow-h{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#cbd5e1;margin-bottom:6px;display:flex;align-items:center}
 .minis{display:flex;flex-wrap:wrap;gap:10px}
-.mini{display:flex;flex-direction:column;flex:1 1 110px;min-width:0}
+.mini{display:flex;flex-direction:column;flex:1 1 72px;min-width:0}
 .mini>span{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:#64748b;margin-bottom:2px}
 .num{width:100%;background:rgba(30,41,59,.8);border:1px solid #334155;border-radius:4px;padding:6px 8px;text-align:right;font-size:14px;color:#f1f5f9;font-family:ui-monospace,monospace}
 .num:focus{outline:none;border-color:#818cf8;box-shadow:0 0 0 1px #818cf8}
@@ -59,7 +59,7 @@ body{margin:0;background:#f1f5f9;color:#1e293b;font-family:ui-sans-serif,system-
 .tip{position:relative;display:inline-flex;align-items:center;margin-left:4px;vertical-align:middle;cursor:help}
 .tip .ic{width:12px;height:12px;color:#94a3b8}
 .tip:hover .ic{color:#818cf8}
-.tip .pop{position:absolute;left:0;top:100%;margin-top:6px;width:230px;z-index:60;background:#0f172a;border:1px solid #334155;color:#e2e8f0;font-size:11px;line-height:1.45;font-weight:400;text-transform:none;letter-spacing:normal;padding:8px 10px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .12s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.tip .pop{position:absolute;left:0;top:100%;margin-top:6px;width:230px;z-index:60;background:#0f172a;border:1px solid #334155;color:#e2e8f0;font-size:11px;line-height:1.45;font-weight:400;text-transform:none;letter-spacing:normal;padding:8px 10px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .12s;white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .tip:hover .pop{opacity:1}
 .tabs{display:flex;gap:4px;margin:20px 0 16px}
 .tab{display:flex;align-items:center;gap:6px;padding:8px 16px;font-size:14px;font-weight:500;color:#64748b;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;border-radius:8px 8px 0 0}
@@ -122,6 +122,19 @@ tfoot .scenhead td{font-size:10px;color:#64748b;text-align:right;white-space:now
 tfoot .scenhead .sticky-l{background:#fff}
 input[type=number]{-moz-appearance:textfield}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+@media(max-width:1023px){
+  .console,.console-inner,.cols{display:contents}
+  .brand{background:#0f172a;margin:0;padding:14px 16px 6px}
+  .panel.volpanel{position:sticky;top:0;z-index:45;background:#0f172a;border:none;border-radius:0;padding:8px 16px 12px}
+  .panel.rentapanel{background:#0f172a;border:none;border-radius:0;padding:2px 16px 14px}
+  .renta-head{margin-bottom:8px}
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:46;margin:0;padding:6px 8px;gap:6px;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -4px 14px rgba(15,23,42,.12)}
+  .tab{flex:1;justify-content:center;border-radius:8px;border-bottom:none}
+  .tab.active{background:#eef2ff}
+  .wrap{padding-bottom:84px}
+  .stickyhead thead th{position:static}
+  .stickyhead{overflow-x:auto}
+}
 </style>
 </head>
 <body>
@@ -269,11 +282,11 @@ function App() {
     return () => { ro.disconnect(); window.removeEventListener("resize", update); };
   }, []);
 
-  return <div>
+  return <div className="page">
     <div className="console" ref={consoleRef}><div className="console-inner">
       <div className="brand"><b>ModifAI</b><span className="sub">Arbitrage crédits</span></div>
       <div className="cols">
-        <div className="panel">
+        <div className="panel volpanel">
           <div className="panel-h"><IcSliders style={{width:14,height:14}}/> Volumes crédits par plan <Tip text="Crédits alloués par plan sur un cycle. Pilotent le nombre d'actions possibles, le remplissage des scénarios et la rentabilité." /></div>
           <div className="params">
             <div>
@@ -281,9 +294,9 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="panel">
+        <div className="panel rentapanel">
           <div className="renta-head">
-            <span className="renta-title">Rentabilité <Tip text="Multiple net par euro investi en acquisition, par horizon. Vert : objectif atteint. Jaune : proche de l'objectif. Rouge : sous l'objectif. Réagit aux volumes crédits. Ne prend pas en compte les achats Extra Crédits qui augmenteront la rentabilité." /></span>
+            <span className="renta-title">Rentabilité <Tip text={"Multiple net par euro investi en acquisition. Basé sur la modélisation économique des nouvelles offres (pricing plans, CPA, répartition des plans...).\nRéagit aux volumes de crédits.\nSous-évalué car ne prend pas en compte les achats d'Extra Crédits, difficiles à anticiper."} /></span>
             <a className="renta-link" href={SHEET} target="_blank" rel="noopener">Baseline &amp; détail ↗</a>
           </div>
           <div className="renta-tiles">
