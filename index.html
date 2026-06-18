@@ -260,7 +260,7 @@ const CW = {
   P: { M0: 1.089e-8, M2: 1.6038e-8, M12: 2.1932912443250363e-8 },
   S: { M0: 6.05e-10, M2: 8.91e-10, M12: 1.2184951357361314e-9 },
 };
-const THRESH = { M0: { g: 0.5, y: 0.4 }, M2: { g: 0.95, y: 0.85 }, M12: { g: 1.9, y: 1.75 } };
+const THRESH = { M0: { g: 0.65, y: 0.5 }, M2: { g: 0.9, y: 0.75 }, M12: { g: 1.8, y: 1.6 } };
 function rclass(h, v) { const t = THRESH[h]; return v >= t.g ? "rgood" : v >= t.y ? "rwarn" : "rbad"; }
 
 const fInt = (n) => (isFinite(n) ? Math.round(n).toLocaleString("fr-FR") : "—");
