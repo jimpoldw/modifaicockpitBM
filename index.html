@@ -12,7 +12,7 @@
 body{margin:0;background:#f1f5f9;color:#1e293b;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:14px}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
 .wrap{max-width:1280px;margin:0 auto;padding:0 16px}
-.console{position:sticky;top:0;z-index:40;background:#0f172a;color:#e2e8f0;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.console{background:#0f172a;color:#e2e8f0;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .console-inner{max-width:1280px;margin:0 auto;padding:12px 16px}
 .brand{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
 .brand b{color:#fff;font-size:14px;letter-spacing:-.01em}
@@ -106,7 +106,7 @@ tfoot .footlabel{text-align:left;color:#475569;font-weight:600;font-size:11px;te
 .sticky-l{position:sticky;left:0;background:#fff;z-index:2}
 .stickyhead{background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .stickyhead table{min-width:880px}
-.stickyhead thead th{position:sticky;top:var(--ch,120px);z-index:20;box-shadow:inset 0 -1px 0 #e2e8f0}
+.stickyhead thead th{position:sticky;top:0;z-index:20;box-shadow:inset 0 -1px 0 #e2e8f0}
 .stickyhead thead th.l{z-index:21}
 .resetbtn{margin-left:10px;font-size:10px;font-weight:500;text-transform:none;letter-spacing:normal;color:#4f46e5;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:3px 8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;vertical-align:middle}
 .resetbtn:hover{background:#e0e7ff}
@@ -135,6 +135,17 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
   .mobile-gate h2{font-size:20px;font-weight:700;margin:0;color:#f8fafc}
   .mobile-gate p{font-size:13px;line-height:1.5;color:#94a3b8;max-width:320px;margin:0}
 }
+.compnote{font-size:12px;color:#475569;margin:0 0 12px;line-height:1.45}
+.comptag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;border-radius:4px;margin-right:6px}
+.comptag.us{background:#eef2ff;color:#4f46e5}
+.comptag.them{background:#f1f5f9;color:#64748b}
+.stickyhead th.us{background:#edf0fe}
+.stickyhead td.us{background:rgba(99,102,241,.06)}
+.compsec td{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#475569;background:#f8fafc;padding:8px 16px;border-top:1px solid #e2e8f0;text-align:left}
+.compvol{font-family:ui-monospace,monospace;font-size:13px;color:#0f172a}
+.compvol.them{color:#475569}
+.xcell{color:#cbd5e1;font-size:13px}
+.compsub{display:block;font-size:10px;color:#94a3b8;font-weight:400;font-family:ui-sans-serif,system-ui,sans-serif;text-transform:none;letter-spacing:normal;margin-top:2px}
 </style>
 </head>
 <body>
@@ -271,6 +282,127 @@ function SecHeader({ sec, open, onToggle, dur, setDur, colSpan }) {
   </tr>;
 }
 
+const FX = 1.16; // 1 EUR = 1,16 USD
+// Coût crédits ModifAI par modèle, config la moins chère à 4s (Kling 5s, résolution mini, sans audio)
+const OURMODEL = { veo: 690, kling: 483, seedance2: 414, sora: 345, seedance15: 125, gptimg: 9, imagen: 50, nano2: 39, seedream: 31 };
+const OUR_CHEAP_IMG = 9;    // GPT image low 1k
+const OUR_CHEAP_VID = 125;  // Seedance 1.5 fast 4s
+
+const COMP = {
+  higgsfield: {
+    label: "Higgsfield",
+    note: "Volumes « jusqu'à » affichés sur la page de pricing Higgsfield, vidéos calées sur 5s. Nos colonnes se calculent en live depuis les jetons, sur notre config la moins chère à 4s (Kling 5s).",
+    plans: [{ name: "Starter", price: 19 }, { name: "Plus", price: 59 }, { name: "Ultra", price: 129 }],
+    sections: [
+      { title: "Génération vidéo", rows: [
+        { model: "Seedance 2.0 720p", our: "seedance2", vols: [null, 53, 133] },
+        { model: "Seedance 2.0 Fast 720p", our: null, vols: [15, 68, 171] },
+        { model: "Kling 3.0 720p", our: "kling", vols: [36, 160, 400] },
+      ] },
+      { title: "Génération image", rows: [
+        { model: "Nano Banana Pro", our: null, vols: [135, 600, 1500] },
+        { model: "Nano Banana 2", our: "nano2", vols: [135, 600, 1500] },
+        { model: "Nano Banana", our: null, vols: [270, 1200, 3000] },
+        { model: "Seedream", our: "seedream", vols: [270, 1200, 3000] },
+        { model: "GPT Image", our: "gptimg", vols: [270, 1200, 3000] },
+        { model: "Higgsfield Soul 2.0", our: null, vols: [2250, 10000, 25000] },
+        { model: "Higgsfield Soul", our: null, vols: [1080, 4800, 12000] },
+        { model: "Reve", our: null, vols: [1080, 4800, 12000] },
+        { model: "Wan 2.2", our: null, vols: [540, 2400, 6000] },
+        { model: "FLUX.2 Pro", our: null, vols: [270, 1200, 3000] },
+        { model: "FLUX.2 Flex", our: null, vols: [90, 400, 1000] },
+        { model: "FLUX.2 Max", our: null, vols: [null, 300, 750] },
+      ] },
+    ],
+  },
+  magnific: {
+    label: "Magnific",
+    note: "Volumes « jusqu'à » affichés sur la page de pricing Magnific, vidéos calées sur 3s. Le plan Pro (230€) n'a pas d'équivalent ModifAI. Nos colonnes se calculent en live, config la moins chère à 4s.",
+    plans: [{ name: "Essential", price: 8 }, { name: "Premium", price: 16 }, { name: "Premium+", price: 36 }],
+    sections: [
+      { title: "Génération vidéo", rows: [
+        { model: "Kling 3.0 4K", our: "kling", vols: [6, 16, 37] },
+        { model: "Kling 3.0 Motion Control Pro", our: null, vols: [17, 44, 100] },
+        { model: "Seedance 2.0 720p", our: "seedance2", vols: [7, 17, 39] },
+        { model: "Seedance 2.0 Fast 720p", our: null, vols: [8, 20, 46] },
+        { model: "Google Veo 3.1 4K w/audio", our: "veo", vols: [3, 9, 21] },
+        { model: "Kling O1 w/video reference", our: null, vols: [10, 26, 60] },
+        { model: "Seedance 1.5 Pro 1080p w/audio", our: null, vols: [9, 22, 51] },
+        { model: "Grok Imagine 1.5 720p", our: null, vols: [9, 23, 53] },
+        { model: "Runway Gen 4.5", our: null, vols: [7, 18, 40] },
+        { model: "Pixverse 6 1080p", our: null, vols: [40, 100, 225] },
+        { model: "Happy Horse 720p", our: null, vols: [16, 40, 90] },
+        { model: "Wan 2.7 1080p", our: null, vols: [20, 50, 112] },
+        { model: "MiniMax Hailuo 2.3 Fast 768p", our: null, vols: [53, 133, "∞"] },
+        { model: "Kling 2.5 720p", our: null, vols: [57, 142, "∞"] },
+      ] },
+      { title: "Génération image", rows: [
+        { model: "Nano Banana 2 1K", our: "nano2", vols: [106, 266, "∞"] },
+        { model: "Nano Banana 2 4K", our: null, vols: [53, 133, 300] },
+        { model: "Nano Banana Pro (1K/2K)", our: null, vols: [106, 266, 600] },
+        { model: "GPT Image 2.0 Mid 2K", our: "gptimg", vols: [20, 50, 112] },
+        { model: "Seedream 5.0 Lite 4K", our: "seedream", vols: [180, 400, "∞"] },
+        { model: "Krea 2", our: null, vols: [100, 250, 562] },
+        { model: "Luma Uni-1.1", our: null, vols: [57, 142, 321] },
+        { model: "Recraft V4.1 Pro", our: null, vols: [45, 114, "∞"] },
+        { model: "Grok", our: null, vols: [114, 285, "∞"] },
+        { model: "Flux.2 Max 1K", our: null, vols: [61, 153, 346] },
+        { model: "Flux.2 Pro 1K", our: null, vols: [180, 400, "∞"] },
+      ] },
+    ],
+  },
+  artlist: {
+    label: "Artlist",
+    note: "Artlist ne détaille pas par modèle : comparatif global « jusqu'à ». Starter est affiché tel quel, Creator est estimé au prorata des crédits, Professional annonce l'illimité sur 13 modèles. Nos colonnes se calculent en live sur notre modèle le moins cher.",
+    global: true,
+    plans: [{ name: "AI Starter", price: "19,99" }, { name: "AI Creator", price: "69,99" }, { name: "AI Professional", price: 399 }],
+    rows: [
+      { model: "Images (jusqu'à)", kind: "img", vols: [1650, "≈ 8 000", "∞"] },
+      { model: "Vidéos (jusqu'à)", kind: "vid", vols: [206, "≈ 1 000", "∞"] },
+    ],
+  },
+};
+
+function volCell(v, isUs) {
+  if (v === null || v === undefined) return <span className="xcell">✕</span>;
+  if (typeof v === "string") return <span className={"compvol" + (isUs ? "" : " them")}>{v}</span>;
+  return <span className={"compvol" + (isUs ? "" : " them")}>{fInt(v)}</span>;
+}
+
+function CompView({ comp, price, alloc }) {
+  const ours = (modelKey, planKey) => { const c = OURMODEL[modelKey]; return c ? Math.floor(alloc[planKey] / c) : null; };
+  const oursGlobal = (kind, planKey) => Math.floor(alloc[planKey] / (kind === "img" ? OUR_CHEAP_IMG : OUR_CHEAP_VID));
+  const rungs = [{ us: "E", label: "Essential" }, { us: "P", label: "Premium" }, { us: "S", label: "Studio" }];
+  const renderRow = (row) => <tr key={row.model}>
+    <td className="l">{row.model}</td>
+    {rungs.map((r, i) => <Fragment key={r.us}>
+      <td className="us">{volCell(comp.global ? oursGlobal(row.kind, r.us) : ours(row.our, r.us), true)}</td>
+      <td>{volCell(row.vols[i], false)}</td>
+    </Fragment>)}
+  </tr>;
+  return <div>
+    <p className="compnote"><span className="comptag us">ModifAI</span><span className="comptag them">{comp.label}</span>{comp.note}</p>
+    <div className="stickyhead"><table>
+      <thead><tr>
+        <th className="l">Modèle</th>
+        {rungs.map((r, i) => <Fragment key={r.us}>
+          <th className="us">{r.label}<span className="compsub">{fInt(price[r.us])}€ · {fInt(alloc[r.us])} cr</span></th>
+          <th>{comp.plans[i].name}<span className="compsub">{comp.plans[i].price}€</span></th>
+        </Fragment>)}
+      </tr></thead>
+      <tbody>
+        {comp.global
+          ? comp.rows.map(renderRow)
+          : comp.sections.map((sec) => <Fragment key={sec.title}>
+              <tr className="compsec"><td colSpan={7}>{sec.title}</td></tr>
+              {sec.rows.map(renderRow)}
+            </Fragment>)}
+      </tbody>
+    </table></div>
+    <p className="legend">Tous les volumes sont des maxima « jusqu'à » (réglages les plus bas). ✕ = modèle non proposé. ∞ = illimité annoncé. Les colonnes ModifAI se recalculent en live selon les jetons saisis en haut.</p>
+  </div>;
+}
+
 function App() {
   const [alloc, setAlloc] = useState({ ...RECO.alloc });
   const [price, setPrice] = useState({ ...RECO.price });
@@ -285,21 +417,10 @@ function App() {
   const mult = useMemo(() => ({ M0: multiple("M0", price, alloc), M2: multiple("M2", price, alloc), M12: multiple("M12", price, alloc) }), [price, alloc]);
   const setQ = (f, i, v) => setQty((p) => ({ ...p, [f]: p[f].map((x, j) => (j === i ? (v === "" ? 0 : parseFloat(v)) : x)) }));
   const resetQty = () => setQty(() => { const o = {}; CAT.forEach((c) => (o[c.f] = SEED[c.f].slice())); return o; });
-  const consoleRef = useRef(null);
-  const [consoleH, setConsoleH] = useState(120);
-  useEffect(() => {
-    const el = consoleRef.current; if (!el) return;
-    const update = () => setConsoleH(el.offsetHeight);
-    update();
-    const ro = new ResizeObserver(update); ro.observe(el);
-    window.addEventListener("resize", update);
-    return () => { ro.disconnect(); window.removeEventListener("resize", update); };
-  }, []);
-
   const isReco = PLAN_KEYS.every((k) => price[k] === RECO.price[k] && alloc[k] === RECO.alloc[k]);
   const applyReco = () => { setPrice({ ...RECO.price }); setAlloc({ ...RECO.alloc }); };
   return <div className="page">
-    <div className="console" ref={consoleRef}><div className="console-inner">
+    <div className="console"><div className="console-inner">
       <div className="brand"><b>ModifAI</b><span className="sub">Arbitrage crédits</span></div>
       <div className="cols">
         <div className="panel volpanel">
@@ -339,17 +460,20 @@ function App() {
       <div className="tabs">
         <button className={"tab" + (tab === "equiv" ? " active" : "")} onClick={() => setTab("equiv")}><IcLayers style={{width:16,height:16}}/> Équivalences</button>
         <button className={"tab" + (tab === "scen" ? " active" : "")} onClick={() => setTab("scen")}><IcBoxes style={{width:16,height:16}}/> Scénarios d'usage</button>
+        <button className={"tab" + (tab === "higgsfield" ? " active" : "")} onClick={() => setTab("higgsfield")}>vs Higgsfield</button>
+        <button className={"tab" + (tab === "magnific" ? " active" : "")} onClick={() => setTab("magnific")}>vs Magnific</button>
+        <button className={"tab" + (tab === "artlist" ? " active" : "")} onClick={() => setTab("artlist")}>vs Artlist</button>
       </div>
-      {tab === "equiv"
-        ? <Equiv credits={credits} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} consoleH={consoleH} />
-        : <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} consoleH={consoleH} resetQty={resetQty} />}
+      {tab === "equiv" && <Equiv credits={credits} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} />}
+      {tab === "scen" && <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} resetQty={resetQty} />}
+      {COMP[tab] && <CompView comp={COMP[tab]} price={price} alloc={alloc} />}
     </div>
     <div className="pagefoot"></div>
   </div>;
 }
 
-function Equiv({ credits, alloc, dur, setDur, open, toggle, consoleH }) {
-  return <div className="stickyhead"><table style={{ ["--ch"]: consoleH + "px" }}>
+function Equiv({ credits, alloc, dur, setDur, open, toggle }) {
+  return <div className="stickyhead"><table>
     <thead><tr><th className="l">Action</th><th>Crédits / action</th>
       {PLAN_KEYS.map((k) => <th key={k}>{PLAN_LABEL[k]}<div className="sub2">{fInt(alloc[k])} cr.</div></th>)}</tr></thead>
     <tbody>
@@ -371,7 +495,7 @@ function verdict(total, alloc) {
   if (total <= alloc.S) return { t: "Plan minimum : Studio", c: "#2563eb" };
   return { t: "Dépasse Studio", c: "#e11d48" };
 }
-function Scenarios({ credits, qty, setQ, totals, alloc, dur, setDur, open, toggle, consoleH, resetQty }) {
+function Scenarios({ credits, qty, setQ, totals, alloc, dur, setDur, open, toggle, resetQty }) {
   const ncol = 2 + SCEN.length;
   return <div>
     <p className="scards-intro">Chaque panier correspond à un profil d'usage type, les consommations étant modifiables. Permet de matcher les profils avec les plans.</p>
@@ -383,7 +507,7 @@ function Scenarios({ credits, qty, setQ, totals, alloc, dur, setDur, open, toggl
         <div className="vd" style={{ color: v.c }}>{v.t}</div>
       </div>; })}
     </div>
-    <div className="stickyhead"><table style={{ ["--ch"]: consoleH + "px" }}>
+    <div className="stickyhead"><table>
       <thead><tr><th className="l sticky-l">Action <button className="resetbtn" onClick={resetQty} title="Remettre toutes les quantités au scénario de base"><IcReset style={{width:12,height:12}}/> Réinitialiser</button></th><th>Cr./action</th>
         {SCEN.map((s) => <th key={s.k}>{s.label}</th>)}</tr></thead>
       <tbody>
