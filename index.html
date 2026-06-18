@@ -146,6 +146,20 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .compgroup td{background:#f1f5f9;color:#334155;font-size:12px;font-weight:700;text-transform:none;letter-spacing:normal;padding:13px 16px 10px;text-align:left;border-top:3px solid #cbd5e1}
 .cghint{display:block;font-size:10px;font-weight:500;color:#94a3b8;margin-top:2px}
 .compsec.sub td{color:#94a3b8}
+.ph-right{display:flex;align-items:center;gap:8px}
+.vatseg{display:inline-flex;border:1px solid #c7d2fe;border-radius:7px;overflow:hidden}
+.vatopt{font-size:10px;font-weight:700;letter-spacing:.03em;padding:4px 10px;border:none;background:#eef2ff;color:#6366f1;cursor:pointer}
+.vatopt.on{background:#6366f1;color:#fff}
+.planref{margin-top:14px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.prtitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#475569;margin-bottom:10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.prhint{font-size:10px;font-weight:500;text-transform:none;letter-spacing:normal;color:#94a3b8}
+.prgrid{display:flex;flex-wrap:wrap;gap:7px}
+.prchip{display:flex;align-items:baseline;gap:6px;border:1px solid #e2e8f0;border-radius:8px;padding:5px 10px;background:#f8fafc}
+.prchip .prname{font-size:11px;color:#64748b;font-weight:600}
+.prchip .prprice{font-size:14px;font-weight:800;color:#0f172a}
+.prchip.on{border-color:#fb923c;background:#fdeee8;box-shadow:0 0 0 1px #fb923c}
+.prchip.on .prname{color:#9a3412}
+.prnote{font-size:10px;color:#94a3b8;margin:10px 0 0;line-height:1.4}
 .brandcell{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:#0f172a;text-transform:none;letter-spacing:normal}
 .brandico{width:22px;height:22px;border-radius:6px;object-fit:cover;flex:none}
 .pricelink{margin-left:1px;font-size:13px;font-weight:700;color:#334155;text-decoration:none;line-height:1;padding:2px 5px;border-radius:5px;background:rgba(255,255,255,.55)}
@@ -251,6 +265,10 @@ function rclass(h, v) { const t = THRESH[h]; return v >= t.g ? "rgood" : v >= t.
 const fInt = (n) => (isFinite(n) ? Math.round(n).toLocaleString("fr-FR") : "—");
 const fPct = (n) => (isFinite(n) ? Math.round(n * 100).toLocaleString("fr-FR") + " %" : "—");
 const fMul = (n) => (isFinite(n) ? n.toFixed(2).replace(".", ",") + "×" : "—");
+const ttcOf = (ht) => ht * (1 + TVA);
+const dispOur = (ttc, mode) => (mode === "TTC" ? ttc : htOf(ttc));
+const dispComp = (ht, mode) => (mode === "TTC" ? ttcOf(ht) : ht);
+const fMoney = (v) => { if (!isFinite(v)) return "—"; const r = Math.round(v * 100) / 100; return Math.abs(r - Math.round(r)) < 0.005 ? Math.round(r).toLocaleString("fr-FR") : r.toFixed(2).replace(".", ","); };
 
 const PLAN_KEYS = ["T", "E", "P", "S"];
 const PLAN_LABEL = { T: "Trial", E: "Essential", P: "Premium", S: "Studio" };
@@ -315,76 +333,97 @@ const COMP = {
   higgsfield: {
     label: "Higgsfield",
     icon: "higgsfield", bg: "#e9f7b0", url: "https://higgsfield.ai/pricing",
-    note: "Volumes « jusqu'à » affichés sur la page de pricing Higgsfield, vidéos calées sur 5s. Nos colonnes se calculent en live depuis les jetons, sur notre config la moins chère à 4s (Kling 5s).",
-    plans: [{ name: "Starter", price: 19 }, { name: "Plus", price: 59 }, { name: "Ultra", price: 129 }],
+    note: "Volumes « jusqu'à » de la page Higgsfield, vidéos calées sur 5s. Les paliers Ultra 6k et 9k sont extrapolés au prorata des crédits (x2, x3). Nos colonnes se calculent en live, config la moins chère à 4s (Kling 5s).",
+    plans: [
+      { id: "starter", name: "Starter", price: 19 },
+      { id: "plus", name: "Plus", price: 59 },
+      { id: "ultra", name: "Ultra", price: 129 },
+      { id: "ultra6", name: "Ultra", price: 250, base: "ultra", mult: 2 },
+      { id: "ultra9", name: "Ultra", price: 375, base: "ultra", mult: 3 },
+    ],
     sections: [
       { title: "Génération vidéo", rows: [
-        { model: "Seedance 2.0 720p", our: "seedance2", vols: [null, 53, 133] },
-        { model: "Seedance 2.0 Fast 720p", our: null, vols: [15, 68, 171] },
-        { model: "Kling 3.0 720p", our: "kling", vols: [36, 160, 400] },
+        { model: "Seedance 2.0 720p", our: "seedance2", v: { starter: null, plus: 53, ultra: 133 } },
+        { model: "Seedance 2.0 Fast 720p", our: null, v: { starter: 15, plus: 68, ultra: 171 } },
+        { model: "Kling 3.0 720p", our: "kling", v: { starter: 36, plus: 160, ultra: 400 } },
       ] },
       { title: "Génération image", rows: [
-        { model: "Nano Banana Pro", our: null, vols: [135, 600, 1500] },
-        { model: "Nano Banana 2", our: "nano2", vols: [135, 600, 1500] },
-        { model: "Nano Banana", our: null, vols: [270, 1200, 3000] },
-        { model: "Seedream", our: "seedream", vols: [270, 1200, 3000] },
-        { model: "GPT Image", our: "gptimg", vols: [270, 1200, 3000] },
-        { model: "Higgsfield Soul 2.0", our: null, vols: [2250, 10000, 25000] },
-        { model: "Higgsfield Soul", our: null, vols: [1080, 4800, 12000] },
-        { model: "Reve", our: null, vols: [1080, 4800, 12000] },
-        { model: "Wan 2.2", our: null, vols: [540, 2400, 6000] },
-        { model: "FLUX.2 Pro", our: null, vols: [270, 1200, 3000] },
-        { model: "FLUX.2 Flex", our: null, vols: [90, 400, 1000] },
-        { model: "FLUX.2 Max", our: null, vols: [null, 300, 750] },
+        { model: "Nano Banana Pro", our: null, v: { starter: 135, plus: 600, ultra: 1500 } },
+        { model: "Nano Banana 2", our: "nano2", v: { starter: 135, plus: 600, ultra: 1500 } },
+        { model: "Nano Banana", our: null, v: { starter: 270, plus: 1200, ultra: 3000 } },
+        { model: "Seedream", our: "seedream", v: { starter: 270, plus: 1200, ultra: 3000 } },
+        { model: "GPT Image", our: "gptimg", v: { starter: 270, plus: 1200, ultra: 3000 } },
+        { model: "Higgsfield Soul 2.0", our: null, v: { starter: 2250, plus: 10000, ultra: 25000 } },
+        { model: "Higgsfield Soul", our: null, v: { starter: 1080, plus: 4800, ultra: 12000 } },
+        { model: "Reve", our: null, v: { starter: 1080, plus: 4800, ultra: 12000 } },
+        { model: "Wan 2.2", our: null, v: { starter: 540, plus: 2400, ultra: 6000 } },
+        { model: "FLUX.2 Pro", our: null, v: { starter: 270, plus: 1200, ultra: 3000 } },
+        { model: "FLUX.2 Flex", our: null, v: { starter: 90, plus: 400, ultra: 1000 } },
+        { model: "FLUX.2 Max", our: null, v: { starter: null, plus: 300, ultra: 750 } },
       ] },
     ],
   },
   magnific: {
     label: "Magnific",
     icon: "magnific", bg: "#e6e7ea", url: "https://www.magnific.com/pricing",
-    note: "Volumes « jusqu'à » affichés sur la page de pricing Magnific, vidéos calées sur 3s. Le plan Pro (230€) n'a pas d'équivalent ModifAI. Nos colonnes se calculent en live, config la moins chère à 4s.",
-    plans: [{ name: "Essential", price: 8 }, { name: "Premium", price: 16 }, { name: "Premium+", price: 36 }],
+    note: "Volumes « jusqu'à » de la page Magnific, vidéos calées sur 3s. La colonne Pro (230€) est relevée de la table comparée et reste à vérifier. Nos colonnes se calculent en live, config la moins chère à 4s.",
+    plans: [
+      { id: "e", name: "Essential", price: 8 },
+      { id: "p", name: "Premium", price: 16 },
+      { id: "pp", name: "Premium+", price: 36 },
+      { id: "pro", name: "Pro", price: 230 },
+    ],
     sections: [
       { title: "Génération vidéo", rows: [
-        { model: "Kling 3.0 4K", our: "kling", vols: [6, 16, 37] },
-        { model: "Kling 3.0 Motion Control Pro", our: null, vols: [17, 44, 100] },
-        { model: "Seedance 2.0 720p", our: "seedance2", vols: [7, 17, 39] },
-        { model: "Seedance 2.0 Fast 720p", our: null, vols: [8, 20, 46] },
-        { model: "Google Veo 3.1 4K w/audio", our: "veo", vols: [3, 9, 21] },
-        { model: "Kling O1 w/video reference", our: null, vols: [10, 26, 60] },
-        { model: "Seedance 1.5 Pro 1080p w/audio", our: null, vols: [9, 22, 51] },
-        { model: "Grok Imagine 1.5 720p", our: null, vols: [9, 23, 53] },
-        { model: "Runway Gen 4.5", our: null, vols: [7, 18, 40] },
-        { model: "Pixverse 6 1080p", our: null, vols: [40, 100, 225] },
-        { model: "Happy Horse 720p", our: null, vols: [16, 40, 90] },
-        { model: "Wan 2.7 1080p", our: null, vols: [20, 50, 112] },
-        { model: "MiniMax Hailuo 2.3 Fast 768p", our: null, vols: [53, 133, "∞"] },
-        { model: "Kling 2.5 720p", our: null, vols: [57, 142, "∞"] },
+        { model: "Kling 3.0 4K", our: "kling", v: { e: 6, p: 16, pp: 37, pro: 250 } },
+        { model: "Kling 3.0 Motion Control Pro", our: null, v: { e: 17, p: 44, pp: 100, pro: 666 } },
+        { model: "Seedance 2.0 720p", our: "seedance2", v: { e: 7, p: 17, pp: 39, pro: 285 } },
+        { model: "Seedance 2.0 Fast 720p", our: null, v: { e: 8, p: 20, pp: 46, pro: 312 } },
+        { model: "Google Veo 3.1 4K w/audio", our: "veo", v: { e: 3, p: 9, pp: 21, pro: 144 } },
+        { model: "Kling O1 w/video reference", our: null, v: { e: 10, p: 26, pp: 60, pro: 400 } },
+        { model: "Seedance 1.5 Pro 1080p w/audio", our: null, v: { e: 9, p: 22, pp: 51, pro: 340 } },
+        { model: "Grok Imagine 1.5 720p", our: null, v: { e: 9, p: 23, pp: 53, pro: 357 } },
+        { model: "Runway Gen 4.5", our: null, v: { e: 7, p: 18, pp: 40, pro: 272 } },
+        { model: "Pixverse 6 1080p", our: null, v: { e: 40, p: 100, pp: 225, pro: 1500 } },
+        { model: "Happy Horse 720p", our: null, v: { e: 16, p: 40, pp: 90, pro: 606 } },
+        { model: "Wan 2.7 1080p", our: null, v: { e: 20, p: 50, pp: 112, pro: 750 } },
+        { model: "MiniMax Hailuo 2.3 Fast 768p", our: null, v: { e: 53, p: 133, pp: "∞", pro: "∞" } },
+        { model: "Kling 2.5 720p", our: null, v: { e: 57, p: 142, pp: "∞", pro: "∞" } },
       ] },
       { title: "Génération image", rows: [
-        { model: "Nano Banana 2 1K", our: "nano2", vols: [106, 266, "∞"] },
-        { model: "Nano Banana 2 4K", our: null, vols: [53, 133, 300] },
-        { model: "Nano Banana Pro (1K/2K)", our: null, vols: [106, 266, 600] },
-        { model: "GPT Image 2.0 Mid 2K", our: "gptimg", vols: [20, 50, 112] },
-        { model: "Seedream 5.0 Lite 4K", our: "seedream", vols: [180, 400, "∞"] },
-        { model: "Krea 2", our: null, vols: [100, 250, 562] },
-        { model: "Luma Uni-1.1", our: null, vols: [57, 142, 321] },
-        { model: "Recraft V4.1 Pro", our: null, vols: [45, 114, "∞"] },
-        { model: "Grok", our: null, vols: [114, 285, "∞"] },
-        { model: "Flux.2 Max 1K", our: null, vols: [61, 153, 346] },
-        { model: "Flux.2 Pro 1K", our: null, vols: [180, 400, "∞"] },
+        { model: "Nano Banana 2 1K", our: "nano2", v: { e: 106, p: 266, pp: "∞", pro: "∞" } },
+        { model: "Nano Banana 2 4K", our: null, v: { e: 53, p: 133, pp: 300, pro: 2000 } },
+        { model: "Nano Banana Pro (1K/2K)", our: null, v: { e: 106, p: 266, pp: 600, pro: 2000 } },
+        { model: "GPT Image 2.0 Mid 2K", our: "gptimg", v: { e: 20, p: 50, pp: 112, pro: 750 } },
+        { model: "Seedream 5.0 Lite 4K", our: "seedream", v: { e: 180, p: 400, pp: "∞", pro: "∞" } },
+        { model: "Krea 2", our: null, v: { e: 100, p: 250, pp: 562, pro: 3750 } },
+        { model: "Luma Uni-1.1", our: null, v: { e: 57, p: 142, pp: 321, pro: 2142 } },
+        { model: "Recraft V4.1 Pro", our: null, v: { e: 45, p: 114, pp: "∞", pro: "∞" } },
+        { model: "Grok", our: null, v: { e: 114, p: 285, pp: "∞", pro: "∞" } },
+        { model: "Flux.2 Max 1K", our: null, v: { e: 61, p: 153, pp: 346, pro: "∞" } },
+        { model: "Flux.2 Pro 1K", our: null, v: { e: 180, p: 400, pp: "∞", pro: "∞" } },
       ] },
     ],
   },
   artlist: {
     label: "Artlist",
     icon: "artlist", bg: "#fef0c3", url: "https://artlist.io/page/pricing/max?tab=ai-suite",
-    note: "Artlist ne détaille pas par modèle : comparatif global « jusqu'à ». Starter est affiché tel quel, Creator est estimé au prorata des crédits, Professional annonce l'illimité sur 13 modèles. Nos colonnes se calculent en live sur notre modèle le moins cher.",
+    note: "Artlist ne détaille pas par modèle : comparatif global « jusqu'à ». Volumes calés sur les paliers Starter publiés (10 cr/image, 80 cr/vidéo), prorata pour Creator et Professional. Le plan Voiceover (voix only) figure dans la liste mais hors comparatif image/vidéo. Nos colonnes se calculent en live sur notre modèle le moins cher.",
     global: true,
-    plans: [{ name: "AI Starter", price: "19,99" }, { name: "AI Creator", price: "69,99" }, { name: "AI Professional", price: 399 }],
+    plans: [
+      { id: "voice", name: "AI Voiceover", price: 15.99, hideUsage: true },
+      { id: "s16", name: "AI Starter", price: 19.99, img: 1650, vid: 206 },
+      { id: "s40", name: "AI Starter", price: 39.99, img: 4000, vid: 500 },
+      { id: "c80", name: "AI Creator", price: 69.99, img: 8000, vid: 1000 },
+      { id: "c180", name: "AI Creator", price: 149.99, img: 18000, vid: 2250 },
+      { id: "c240", name: "AI Creator", price: 199.99, img: 24000, vid: 3000 },
+      { id: "p500", name: "AI Professional", price: 399.99, img: 50000, vid: 6250 },
+      { id: "p1m", name: "AI Professional", price: 799.99, img: 100000, vid: 12500 },
+      { id: "p15", name: "AI Professional", price: 1199.99, img: 150000, vid: 18750 },
+    ],
     rows: [
-      { model: "Images (jusqu'à)", kind: "img", vols: [1650, "≈ 8 000", "∞"] },
-      { model: "Vidéos (jusqu'à)", kind: "vid", vols: [206, "≈ 1 000", "∞"] },
+      { model: "Images (jusqu'à)", kind: "img" },
+      { model: "Vidéos (jusqu'à)", kind: "vid" },
     ],
   },
 };
@@ -395,14 +434,25 @@ function volCell(v, isUs) {
   return <span className={"compvol" + (isUs ? "" : " them")}>{fInt(v)}</span>;
 }
 
-function CompView({ comp, price, alloc }) {
+function CompView({ comp, price, alloc, vatMode }) {
+  const PLAN3 = ["E", "P", "S"];
+  const LBL = { E: "Essential", P: "Premium", S: "Studio" };
   const ours = (modelKey, planKey) => { const c = OURMODEL[modelKey]; return c ? Math.floor(alloc[planKey] / c) : null; };
   const oursGlobal = (kind, planKey) => Math.floor(alloc[planKey] / (kind === "img" ? OUR_CHEAP_IMG : OUR_CHEAP_VID));
-  const rungs = [{ us: "E", label: "Essential" }, { us: "P", label: "Premium" }, { us: "S", label: "Studio" }];
+
+  // Sélection dynamique : pour chaque plan ModifAI, le plan concurrent le plus proche en prix (base HT commune)
+  const pool = comp.plans.filter((p) => !p.hideUsage);
+  const pick = (htv) => pool.reduce((best, p) => (Math.abs(p.price - htv) < Math.abs(best.price - htv) ? p : best), pool[0]);
+  const picked = { E: pick(htOf(price.E)), P: pick(htOf(price.P)), S: pick(htOf(price.S)) };
+  const pickedSet = new Set(PLAN3.map((k) => picked[k]));
+
+  const planVol = (plan, row) => { const id = plan.base || plan.id; let v = row.v[id]; if (plan.mult && typeof v === "number") v = v * plan.mult; return v; };
+  const themVol = (plan, row) => (comp.global ? (row.kind === "img" ? plan.img : plan.vid) : planVol(plan, row));
+
   const renderRow = (row) => <tr key={row.model}>
     <td className="l">{row.model}</td>
-    {rungs.map((r) => <td key={r.us} className="us">{volCell(comp.global ? oursGlobal(row.kind, r.us) : ours(row.our, r.us), true)}</td>)}
-    {comp.plans.map((p, i) => <td key={p.name} className={"them" + (i === 0 ? " sep" : "")}>{volCell(row.vols[i], false)}</td>)}
+    {PLAN3.map((k) => <td key={k} className="us">{volCell(comp.global ? oursGlobal(row.kind, k) : ours(row.our, k), true)}</td>)}
+    {PLAN3.map((k, i) => <td key={k} className={"them" + (i === 0 ? " sep" : "")}>{volCell(themVol(picked[k], row), false)}</td>)}
   </tr>;
 
   let body;
@@ -424,6 +474,8 @@ function CompView({ comp, price, alloc }) {
     </Fragment>;
   }
 
+  const allSorted = [...comp.plans].sort((a, b) => a.price - b.price);
+
   return <div>
     <p className="compnote">{comp.note}</p>
     <div className="stickyhead"><table>
@@ -441,23 +493,37 @@ function CompView({ comp, price, alloc }) {
         </tr>
         <tr className="planrow">
           <th className="l modelhead">Modèle</th>
-          {rungs.map((r) => <th key={r.us} className="us">
-            <span className="planname">{r.label}</span><span className="bigprice">{fInt(price[r.us])}€</span>
+          {PLAN3.map((k) => <th key={k} className="us">
+            <span className="planname">{LBL[k]}</span><span className="bigprice">{fMoney(dispOur(price[k], vatMode))}€</span>
           </th>)}
-          {comp.plans.map((p, i) => <th key={p.name} className={"them" + (i === 0 ? " sep" : "")}>
-            <span className="planname">{p.name}</span><span className="bigprice">{p.price}€</span>
+          {PLAN3.map((k, i) => <th key={k} className={"them" + (i === 0 ? " sep" : "")}>
+            <span className="planname">{picked[k].name}</span><span className="bigprice">{fMoney(dispComp(picked[k].price, vatMode))}€</span>
           </th>)}
         </tr>
       </thead>
       <tbody>{body}</tbody>
     </table></div>
-    <p className="legend">Tous les volumes sont des maxima « jusqu'à » (réglages les plus bas). ✕ = modèle non proposé. ∞ = illimité annoncé. Les colonnes ModifAI se recalculent en live selon les jetons saisis en haut.</p>
+
+    <div className="planref">
+      <div className="prtitle">Tous les plans {comp.label} (mensuel, {vatMode})<span className="prhint">surlignés = comparés à vos plans actuels</span></div>
+      <div className="prgrid">
+        {allSorted.map((p) => <div key={p.id} className={"prchip" + (pickedSet.has(p) ? " on" : "")}>
+          <span className="prname">{p.name}</span><span className="prprice">{fMoney(dispComp(p.price, vatMode))}€</span>
+        </div>)}
+      </div>
+      <p className="prnote">{vatMode === "TTC"
+        ? "Tarifs concurrents convertis en TTC (TVA 20% estimée, marché EU). Catalogues affichés en HT sur leurs sites."
+        : "Tarifs concurrents en HT (catalogue). Vos prix convertis en HT depuis le TTC saisi."}</p>
+    </div>
+
+    <p className="legend">Tous les volumes sont des maxima « jusqu'à » (réglages les plus bas). ✕ = modèle non proposé. ∞ = illimité annoncé. Les colonnes concurrent affichent le plan le plus proche de votre prix ; les volumes ModifAI se recalculent en live selon les jetons.</p>
   </div>;
 }
 
 function App() {
   const [alloc, setAlloc] = useState({ ...RECO.alloc });
   const [price, setPrice] = useState({ ...RECO.price });
+  const [vatMode, setVatMode] = useState("TTC");
   const [dur, setDur] = useState({ gen: 8, upscale: 30 });
   const [qty, setQty] = useState(() => { const o = {}; CAT.forEach((c) => (o[c.f] = SEED[c.f].slice())); return o; });
   const [tab, setTab] = useState("equiv");
@@ -477,14 +543,20 @@ function App() {
       <div className="cols">
         <div className="panel volpanel">
           <div className="panel-h">
-            <span className="ph-title"><IcSliders style={{width:14,height:14}}/> Prix &amp; jetons par plan <Tip text={"Prix TTC affiché aux utilisateurs et jetons inclus, par plan. La rentabilité se calcule sur le prix HT (TTC / 1,2)."} /></span>
-            <button className={"recobtn" + (isReco ? " on" : "")} onClick={applyReco}>{isReco ? "✓ Reco JP" : "Reco JP"}</button>
+            <span className="ph-title"><IcSliders style={{width:14,height:14}}/> Prix &amp; jetons par plan <Tip text={"Prix affiché aux utilisateurs et jetons inclus, par plan. Bascule HT/TTC applicable partout. La rentabilité se calcule toujours sur le HT (TTC / 1,2)."} /></span>
+            <div className="ph-right">
+              <div className="vatseg">
+                <button className={"vatopt" + (vatMode === "TTC" ? " on" : "")} onClick={() => setVatMode("TTC")}>TTC</button>
+                <button className={"vatopt" + (vatMode === "HT" ? " on" : "")} onClick={() => setVatMode("HT")}>HT</button>
+              </div>
+              <button className={"recobtn" + (isReco ? " on" : "")} onClick={applyReco}>{isReco ? "✓ Reco JP" : "Reco JP"}</button>
+            </div>
           </div>
           <div className="params">
             <div>
               <div className="minis">{PLAN_KEYS.map((k) => <div className="pcol" key={k}>
                 <div className="pcol-h">{PLAN_LABEL[k]}</div>
-                <label className="fld"><span>Prix TTC (€)</span><Num value={price[k]} step={k === "T" ? 0.1 : 1} onChange={(v) => setPrice((p) => ({ ...p, [k]: v }))} /></label>
+                <label className="fld"><span>Prix {vatMode} (€)</span><Num value={vatMode === "TTC" ? price[k] : Math.round(htOf(price[k]) * 100) / 100} step={k === "T" ? 0.1 : (vatMode === "HT" ? 0.01 : 1)} onChange={(v) => setPrice((p) => ({ ...p, [k]: vatMode === "TTC" ? v : ttcOf(v) }))} /></label>
                 <label className="fld"><span>Jetons</span><Num value={alloc[k]} step={500} onChange={(v) => setAlloc((p) => ({ ...p, [k]: v }))} /></label>
               </div>)}</div>
             </div>
@@ -518,7 +590,7 @@ function App() {
       </div>
       {tab === "equiv" && <Equiv credits={credits} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} />}
       {tab === "scen" && <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} resetQty={resetQty} />}
-      {COMP[tab] && <CompView comp={COMP[tab]} price={price} alloc={alloc} />}
+      {COMP[tab] && <CompView comp={COMP[tab]} price={price} alloc={alloc} vatMode={vatMode} />}
     </div>
     <div className="pagefoot"></div>
   </div>;
