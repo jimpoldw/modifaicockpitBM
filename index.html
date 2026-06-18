@@ -141,7 +141,11 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .comptag.them{background:#f1f5f9;color:#64748b}
 .stickyhead thead .brandrow th{top:0;z-index:22;height:38px;padding:0 12px;text-align:center}
 .stickyhead thead .planrow th{top:38px;z-index:21;text-align:center;padding:7px 12px}
-.stickyhead thead .brandrow th.modelhead{z-index:23;top:0;text-align:left;vertical-align:bottom}
+.stickyhead thead .brandrow th.corner{top:0;z-index:23;background:#fff}
+.stickyhead thead .planrow th.modelhead{top:38px;z-index:23;text-align:left;vertical-align:bottom;background:#fff;font-size:11px}
+.compgroup td{background:#f1f5f9;color:#334155;font-size:12px;font-weight:700;text-transform:none;letter-spacing:normal;padding:13px 16px 10px;text-align:left;border-top:3px solid #cbd5e1}
+.cghint{display:block;font-size:10px;font-weight:500;color:#94a3b8;margin-top:2px}
+.compsec.sub td{color:#94a3b8}
 .brandcell{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:#0f172a;text-transform:none;letter-spacing:normal}
 .brandico{width:22px;height:22px;border-radius:6px;object-fit:cover;flex:none}
 .pricelink{margin-left:1px;font-size:13px;font-weight:700;color:#334155;text-decoration:none;line-height:1;padding:2px 5px;border-radius:5px;background:rgba(255,255,255,.55)}
@@ -400,12 +404,32 @@ function CompView({ comp, price, alloc }) {
     {rungs.map((r) => <td key={r.us} className="us">{volCell(comp.global ? oursGlobal(row.kind, r.us) : ours(row.our, r.us), true)}</td>)}
     {comp.plans.map((p, i) => <td key={p.name} className={"them" + (i === 0 ? " sep" : "")}>{volCell(row.vols[i], false)}</td>)}
   </tr>;
+
+  let body;
+  if (comp.global) {
+    body = comp.rows.map(renderRow);
+  } else {
+    const sharedSecs = comp.sections.map((s) => ({ title: s.title, rows: s.rows.filter((r) => r.our != null) })).filter((s) => s.rows.length);
+    const extraSecs = comp.sections.map((s) => ({ title: s.title, rows: s.rows.filter((r) => r.our == null) })).filter((s) => s.rows.length);
+    body = <Fragment>
+      {sharedSecs.map((sec) => <Fragment key={"s" + sec.title}>
+        <tr className="compsec"><td colSpan={7}>{sec.title}</td></tr>
+        {sec.rows.map(renderRow)}
+      </Fragment>)}
+      {extraSecs.length > 0 && <tr className="compgroup"><td colSpan={7}>Aussi proposés par {comp.label}, pas encore chez ModifAI<span className="cghint">Veille concurrence et pistes d'intégration pour l'équipe API</span></td></tr>}
+      {extraSecs.map((sec) => <Fragment key={"e" + sec.title}>
+        <tr className="compsec sub"><td colSpan={7}>{sec.title}</td></tr>
+        {sec.rows.map(renderRow)}
+      </Fragment>)}
+    </Fragment>;
+  }
+
   return <div>
-    <p className="compnote"><span className="comptag us">ModifAI</span><span className="comptag them">{comp.label}</span>{comp.note}</p>
+    <p className="compnote">{comp.note}</p>
     <div className="stickyhead"><table>
       <thead>
         <tr className="brandrow">
-          <th className="l modelhead" rowSpan={2}>Modèle</th>
+          <th className="l corner"></th>
           <th className="us" colSpan={3}>
             <span className="brandcell"><img className="brandico" src={ICON.modifai} alt="" />ModifAI</span>
           </th>
@@ -416,6 +440,7 @@ function CompView({ comp, price, alloc }) {
           </th>
         </tr>
         <tr className="planrow">
+          <th className="l modelhead">Modèle</th>
           {rungs.map((r) => <th key={r.us} className="us">
             <span className="planname">{r.label}</span><span className="bigprice">{fInt(price[r.us])}€</span>
           </th>)}
@@ -424,14 +449,7 @@ function CompView({ comp, price, alloc }) {
           </th>)}
         </tr>
       </thead>
-      <tbody>
-        {comp.global
-          ? comp.rows.map(renderRow)
-          : comp.sections.map((sec) => <Fragment key={sec.title}>
-              <tr className="compsec"><td colSpan={7}>{sec.title}</td></tr>
-              {sec.rows.map(renderRow)}
-            </Fragment>)}
-      </tbody>
+      <tbody>{body}</tbody>
     </table></div>
     <p className="legend">Tous les volumes sont des maxima « jusqu'à » (réglages les plus bas). ✕ = modèle non proposé. ∞ = illimité annoncé. Les colonnes ModifAI se recalculent en live selon les jetons saisis en haut.</p>
   </div>;
