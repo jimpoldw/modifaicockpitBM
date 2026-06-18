@@ -20,7 +20,14 @@ body{margin:0;background:#f1f5f9;color:#1e293b;font-family:ui-sans-serif,system-
 .cols{display:grid;grid-template-columns:1fr;gap:16px}
 @media(min-width:1024px){.cols{grid-template-columns:1fr 1fr}}
 .panel{border:1px solid rgba(51,65,85,.6);background:rgba(30,41,59,.4);border-radius:10px;padding:12px}
-.panel-h{display:flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:18px}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:18px}
+.ph-title{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.recobtn{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid #475569;background:transparent;color:#94a3b8;cursor:pointer;white-space:nowrap}
+.recobtn.on{background:#6366f1;border-color:#6366f1;color:#fff}
+.pcol{display:flex;flex-direction:column;flex:1 1 120px;min-width:0;gap:8px}
+.pcol-h{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#cbd5e1}
+.fld{display:flex;flex-direction:column;gap:3px}
+.fld>span{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.03em}
 .params{display:flex;flex-wrap:wrap;gap:14px 36px}
 .prow-h{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#cbd5e1;margin-bottom:6px;display:flex;align-items:center}
 .minis{display:flex;flex-wrap:wrap;gap:10px}
@@ -203,11 +210,15 @@ const SEED = {
   "Video Generator — High": [2,0,1,0,0,0,0], "Video Generator — Ultra High": [1,0,0,0,0,0,0],
 };
 
-const K = { M0: 0.7903333333333334, M2: 1.08, M12: 2 };
-const COEFF = {
-  M0:  { T: 1.3894736842105265e-8, E: 3.6300000000000006e-11, P: 3.267e-10,            S: 1.037142857142857e-11 },
-  M2:  { T: 1.3894736842105265e-8, E: 5.346000000000001e-11,  P: 4.811400000000001e-10, S: 1.527428571428571e-11 },
-  M12: { T: 1.3894736842105265e-8, E: 7.310970814416789e-11,  P: 6.579873732975109e-10, S: 2.088848804119082e-11 },
+const TVA = 0.2;
+const htOf = (ttc) => ttc / (1 + TVA);
+const REV = { T: 0.036, P: 0.022 };
+const RBASE = { M2: 1.08, M12: 2 };
+const CW = {
+  T: { M0: 2.2e-8, M2: 2.2e-8, M12: 2.2e-8 },
+  E: { M0: 6.05e-10, M2: 8.91e-10, M12: 1.2184951357361314e-9 },
+  P: { M0: 1.089e-8, M2: 1.6038e-8, M12: 2.1932912443250363e-8 },
+  S: { M0: 6.05e-10, M2: 8.91e-10, M12: 1.2184951357361314e-9 },
 };
 const THRESH = { M0: { g: 0.5, y: 0.4 }, M2: { g: 0.95, y: 0.85 }, M12: { g: 1.9, y: 1.75 } };
 function rclass(h, v) { const t = THRESH[h]; return v >= t.g ? "rgood" : v >= t.y ? "rwarn" : "rbad"; }
@@ -218,6 +229,7 @@ const fMul = (n) => (isFinite(n) ? n.toFixed(2).replace(".", ",") + "×" : "—"
 
 const PLAN_KEYS = ["T", "E", "P", "S"];
 const PLAN_LABEL = { T: "Trial", E: "Essential", P: "Premium", S: "Studio" };
+const RECO = { price: { T: 1.90, E: 20, P: 40, S: 70 }, alloc: { T: 2000, E: 4000, P: 13000, S: 26000 } };
 
 const Svg = (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p} />;
 const IcInfo = (p) => <Svg {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></Svg>;
@@ -242,9 +254,11 @@ function creditsFor(c, dur) {
   if (c.vu) return Math.ceil(c.vu * dur.upscale);
   return c.cr;
 }
-function multiple(t, a) {
-  const c = COEFF[t];
-  return K[t] - (c.T * a.T * a.T + c.E * a.E * a.E + c.P * a.P * a.P + c.S * a.S * a.S);
+function multiple(t, price, alloc) {
+  const h = { T: htOf(price.T), E: htOf(price.E), P: htOf(price.P), S: htOf(price.S) };
+  const cost = CW.T[t]*alloc.T*alloc.T/h.T + CW.E[t]*alloc.E*alloc.E/h.E + CW.P[t]*alloc.P*alloc.P/h.P + CW.S[t]*alloc.S*alloc.S/h.S;
+  const rev = t === "M0" ? (REV.T*h.T + REV.P*h.P) : RBASE[t];
+  return rev - cost;
 }
 
 function SecHeader({ sec, open, onToggle, dur, setDur, colSpan }) {
@@ -261,7 +275,8 @@ function SecHeader({ sec, open, onToggle, dur, setDur, colSpan }) {
 }
 
 function App() {
-  const [alloc, setAlloc] = useState({ E: 4000, P: 13000, S: 26000, T: 2000 });
+  const [alloc, setAlloc] = useState({ ...RECO.alloc });
+  const [price, setPrice] = useState({ ...RECO.price });
   const [dur, setDur] = useState({ gen: 8, upscale: 30 });
   const [qty, setQty] = useState(() => { const o = {}; CAT.forEach((c) => (o[c.f] = SEED[c.f].slice())); return o; });
   const [tab, setTab] = useState("equiv");
@@ -270,7 +285,7 @@ function App() {
 
   const credits = useMemo(() => { const m = {}; CAT.forEach((c) => (m[c.f] = creditsFor(c, dur))); return m; }, [dur]);
   const totals = useMemo(() => SCEN.map((s, i) => CAT.reduce((sum, c) => sum + (qty[c.f][i] || 0) * credits[c.f], 0)), [qty, credits]);
-  const mult = useMemo(() => ({ M0: multiple("M0", alloc), M2: multiple("M2", alloc), M12: multiple("M12", alloc) }), [alloc]);
+  const mult = useMemo(() => ({ M0: multiple("M0", price, alloc), M2: multiple("M2", price, alloc), M12: multiple("M12", price, alloc) }), [price, alloc]);
   const setQ = (f, i, v) => setQty((p) => ({ ...p, [f]: p[f].map((x, j) => (j === i ? (v === "" ? 0 : parseFloat(v)) : x)) }));
   const resetQty = () => setQty(() => { const o = {}; CAT.forEach((c) => (o[c.f] = SEED[c.f].slice())); return o; });
   const consoleRef = useRef(null);
@@ -284,21 +299,30 @@ function App() {
     return () => { ro.disconnect(); window.removeEventListener("resize", update); };
   }, []);
 
+  const isReco = PLAN_KEYS.every((k) => price[k] === RECO.price[k] && alloc[k] === RECO.alloc[k]);
+  const applyReco = () => { setPrice({ ...RECO.price }); setAlloc({ ...RECO.alloc }); };
   return <div className="page">
     <div className="console" ref={consoleRef}><div className="console-inner">
       <div className="brand"><b>ModifAI</b><span className="sub">Arbitrage crédits</span></div>
       <div className="cols">
         <div className="panel volpanel">
-          <div className="panel-h"><IcSliders style={{width:14,height:14}}/> Volumes crédits par plan <Tip text="Crédits alloués par plan sur un cycle. Pilotent le nombre d'actions possibles, le remplissage des scénarios et la rentabilité." /></div>
+          <div className="panel-h">
+            <span className="ph-title"><IcSliders style={{width:14,height:14}}/> Prix &amp; jetons par plan <Tip text={"Prix TTC affiché aux utilisateurs et jetons inclus, par plan. La rentabilité se calcule sur le prix HT (TTC / 1,2)."} /></span>
+            <button className={"recobtn" + (isReco ? " on" : "")} onClick={applyReco}>{isReco ? "✓ Reco JP" : "Reco JP"}</button>
+          </div>
           <div className="params">
             <div>
-              <div className="minis">{PLAN_KEYS.map((k) => <Mini key={k} t={PLAN_LABEL[k]}><Num value={alloc[k]} step={500} onChange={(v) => setAlloc((p) => ({ ...p, [k]: v }))} /></Mini>)}</div>
+              <div className="minis">{PLAN_KEYS.map((k) => <div className="pcol" key={k}>
+                <div className="pcol-h">{PLAN_LABEL[k]}</div>
+                <label className="fld"><span>Prix TTC (€)</span><Num value={price[k]} step={k === "T" ? 0.1 : 1} onChange={(v) => setPrice((p) => ({ ...p, [k]: v }))} /></label>
+                <label className="fld"><span>Jetons</span><Num value={alloc[k]} step={500} onChange={(v) => setAlloc((p) => ({ ...p, [k]: v }))} /></label>
+              </div>)}</div>
             </div>
           </div>
         </div>
         <div className="panel rentapanel">
           <div className="renta-head">
-            <span className="renta-title">Rentabilité <Tip text={"Multiple net par euro investi en acquisition. Basé sur la modélisation économique des nouvelles offres (pricing plans, CPA, répartition des plans...).\nRéagit aux volumes de crédits.\nSous-évalué car ne prend pas en compte les achats d'Extra Crédits, difficiles à anticiper."} /></span>
+            <span className="renta-title">Rentabilité <Tip text={"Multiple net par euro investi en acquisition. Basé sur la modélisation économique des nouvelles offres (pricing plans, CPA, répartition des plans...).\nRéagit aux prix et aux volumes de crédits.\nSous-évalué car ne prend pas en compte les achats d'Extra Crédits, difficiles à anticiper."} /></span>
             <a className="renta-link" href={SHEET} target="_blank" rel="noopener">Baseline &amp; détail ↗</a>
           </div>
           <div className="renta-tiles">
