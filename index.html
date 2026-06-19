@@ -144,8 +144,12 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .comptag.them{background:#f1f5f9;color:#64748b}
 .stickyhead thead .brandrow th{top:0;z-index:22;height:38px;padding:0 12px;text-align:center}
 .stickyhead thead .planrow th{top:38px;z-index:21;text-align:center;padding:7px 12px}
-.stickyhead thead .brandrow th.corner{top:0;z-index:23;background:#fff}
-.stickyhead thead .planrow th.modelhead{top:38px;z-index:23;text-align:left;vertical-align:bottom;background:#fff;font-size:11px}
+.stickyhead thead .brandrow th.corner{top:0;z-index:23;background:#f8fafc;text-align:left;vertical-align:middle;font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;border-right:1px solid #e2e8f0}
+.stickyhead thead .planrow th.modelhead{top:38px;z-index:23;text-align:left;vertical-align:middle;background:#f8fafc;font-size:12px;font-weight:700;color:#475569;border-right:1px solid #e2e8f0}
+.automode{margin-left:8px;border:none;border-radius:999px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.75);color:#475569;letter-spacing:.2px}
+.automode.on{background:#0f172a;color:#fff}
+.planselect{width:100%;max-width:150px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;padding:3px 6px;font-size:12px;font-weight:600;color:#0f172a;cursor:pointer;font-family:inherit}
+.planrow th.them .planselect{margin:0 auto 2px;display:block}
 .compgroup td{background:#f1f5f9;color:#334155;font-size:12px;font-weight:700;text-transform:none;letter-spacing:normal;padding:13px 16px 10px;text-align:left;border-top:3px solid #cbd5e1}
 .cghint{display:block;font-size:10px;font-weight:500;color:#94a3b8;margin-top:2px}
 .compsec.sub td{color:#94a3b8}
@@ -443,17 +447,33 @@ function volCell(v, isUs) {
   return <span className={"compvol" + (isUs ? "" : " them")}>{fInt(v)}</span>;
 }
 
-function CompView({ comp, price, alloc, vatMode }) {
+function CompView({ comp, compKey, compSel, setCompSel, price, alloc, vatMode }) {
   const PLAN3 = ["E", "P", "S"];
   const LBL = { E: "Essential", P: "Premium", S: "Studio" };
   const ours = (modelKey, planKey) => { const c = OURMODEL[modelKey]; return c ? Math.floor(alloc[planKey] / c) : null; };
   const oursGlobal = (kind, planKey) => Math.floor(alloc[planKey] / (kind === "img" ? OUR_CHEAP_IMG : OUR_CHEAP_VID));
 
-  // Sélection dynamique : pour chaque plan ModifAI, le plan concurrent le plus proche en prix (base HT commune)
+  // Sélection des plans concurrent par colonne : Auto (plan le plus proche en prix) ou Manuel (choix utilisateur)
   const pool = comp.plans.filter((p) => !p.hideUsage);
   const pick = (htv) => pool.reduce((best, p) => (Math.abs(p.price - htv) < Math.abs(best.price - htv) ? p : best), pool[0]);
-  const picked = { E: pick(htOf(price.E)), P: pick(htOf(price.P)), S: pick(htOf(price.S)) };
+  const autoPick = { E: pick(htOf(price.E)), P: pick(htOf(price.P)), S: pick(htOf(price.S)) };
+  const byId = (id) => pool.find((p) => p.id === id);
+  const sel = compSel[compKey] || {};
+  const auto = sel.auto !== false;
+  const picked = {};
+  PLAN3.forEach((k) => { picked[k] = auto ? autoPick[k] : (byId(sel[k]) || autoPick[k]); });
   const pickedSet = new Set(PLAN3.map((k) => picked[k]));
+
+  const setAuto = (val) => setCompSel((prev) => {
+    const cur = prev[compKey] || {};
+    if (val) return { ...prev, [compKey]: { ...cur, auto: true } };
+    return { ...prev, [compKey]: { auto: false, E: cur.E || autoPick.E.id, P: cur.P || autoPick.P.id, S: cur.S || autoPick.S.id } };
+  });
+  const chooseManual = (k, id) => setCompSel((prev) => {
+    const cur = prev[compKey] || {};
+    const base = cur.auto === false ? { E: cur.E, P: cur.P, S: cur.S } : { E: autoPick.E.id, P: autoPick.P.id, S: autoPick.S.id };
+    return { ...prev, [compKey]: { auto: false, ...base, [k]: id } };
+  });
 
   const planVol = (plan, row) => { const id = plan.base || plan.id; let v = row.v[id]; if (plan.mult && typeof v === "number") v = v * plan.mult; return v; };
   const themVol = (plan, row) => (comp.global ? (row.kind === "img" ? plan.img : plan.vid) : planVol(plan, row));
@@ -490,13 +510,14 @@ function CompView({ comp, price, alloc, vatMode }) {
     <div className="stickyhead"><table>
       <thead>
         <tr className="brandrow">
-          <th className="l corner"></th>
+          <th className="l corner">Volumes par plan</th>
           <th className="us" colSpan={3}>
             <span className="brandcell"><img className="brandico" src={ICON.modifai} alt="" />ModifAI</span>
           </th>
           <th className="them sep" colSpan={3} style={{ background: comp.bg }}>
             <span className="brandcell"><img className="brandico" src={ICON[comp.icon]} alt="" />{comp.label}
               <a className="pricelink" href={comp.url} target="_blank" rel="noopener noreferrer" title="Voir la page de pricing">↗</a>
+              <button className={"automode" + (auto ? " on" : "")} onClick={() => setAuto(!auto)} title={auto ? "Auto : chaque colonne affiche le plan le plus proche de votre prix. Cliquez pour choisir manuellement." : "Manuel : vous choisissez chaque plan. Cliquez pour revenir au plan le plus proche de votre prix."}>{auto ? "Auto" : "Manuel"}</button>
             </span>
           </th>
         </tr>
@@ -506,7 +527,10 @@ function CompView({ comp, price, alloc, vatMode }) {
             <span className="planname">{LBL[k]}</span><span className="bigprice">{fMoney(dispOur(price[k], vatMode))}€</span>
           </th>)}
           {PLAN3.map((k, i) => <th key={k} className={"them" + (i === 0 ? " sep" : "")}>
-            <span className="planname">{picked[k].name}</span><span className="bigprice">{fMoney(dispComp(picked[k].price, vatMode))}€</span>
+            <select className="planselect" value={picked[k].id} onChange={(e) => chooseManual(k, e.target.value)}>
+              {pool.map((p) => <option key={p.id} value={p.id}>{p.name} · {fMoney(dispComp(p.price, vatMode))}€</option>)}
+            </select>
+            <span className="bigprice">{fMoney(dispComp(picked[k].price, vatMode))}€</span>
           </th>)}
         </tr>
       </thead>
@@ -525,7 +549,7 @@ function CompView({ comp, price, alloc, vatMode }) {
         : "Tarifs concurrents en HT (catalogue). Vos prix convertis en HT depuis le TTC saisi."}</p>
     </div>
 
-    <p className="legend">Tous les volumes sont des maxima « jusqu'à » (réglages les plus bas). ✕ = modèle non proposé. ∞ = illimité annoncé. Les colonnes concurrent affichent le plan le plus proche de votre prix ; les volumes ModifAI se recalculent en live selon les jetons.</p>
+    <p className="legend">Tous les volumes sont des maxima « jusqu'à » (réglages les plus bas). ✕ = modèle non proposé. ∞ = illimité annoncé. En mode Auto, chaque colonne concurrent affiche le plan le plus proche de votre prix ; passez en Manuel (en-tête du concurrent) pour choisir librement chaque plan via les menus déroulants. Les volumes ModifAI se recalculent en live selon les jetons.</p>
   </div>;
 }
 
@@ -536,6 +560,7 @@ function App() {
   const [dur, setDur] = useState({ gen: 8, upscale: 30 });
   const [qty, setQty] = useState(() => { const o = {}; CAT.forEach((c) => (o[c.f] = SEED[c.f].slice())); return o; });
   const [tab, setTab] = useState("equiv");
+  const [compSel, setCompSel] = useState({});
   const [open, setOpen] = useState({ retouche:true, upImg:true, upVid:true, genBg:true, tts:true, imgGen:true, vidGen:true });
   const toggle = (id) => setOpen((p) => ({ ...p, [id]: !p[id] }));
 
@@ -602,7 +627,7 @@ function App() {
       </div>
       {tab === "equiv" && <Equiv credits={credits} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} />}
       {tab === "scen" && <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} resetQty={resetQty} />}
-      {COMP[tab] && <CompView comp={COMP[tab]} price={price} alloc={alloc} vatMode={vatMode} />}
+      {COMP[tab] && <CompView comp={COMP[tab]} compKey={tab} compSel={compSel} setCompSel={setCompSel} price={price} alloc={alloc} vatMode={vatMode} />}
     </div>
     <div className="pagefoot"></div>
   </div>;
