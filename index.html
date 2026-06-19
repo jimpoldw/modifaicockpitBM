@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ModifAI · Arbitrage crédits</title>
+<title>ModifAI · Pricing &amp; Credits Cockpit</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
@@ -189,16 +189,16 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 <body>
 <div id="root"></div>
 <div class="mobile-gate">
-  <div class="mg-badge">ModifAI · Arbitrage crédits</div>
-  <h2>Disponible sur desktop uniquement</h2>
-  <p>Ce cockpit d'arbitrage est conçu pour un grand écran. Ouvre la page sur un ordinateur pour accéder aux paramètres, aux équivalences et aux comparaisons.</p>
+  <div class="mg-badge">ModifAI · Pricing &amp; Credits Cockpit</div>
+  <h2>Desktop only</h2>
+  <p>This cockpit is designed for a large screen. Open the page on a computer to access the settings, equivalences and comparisons.</p>
 </div>
 <script type="text/babel" data-presets="react">
 const { useState, useMemo, useRef, useEffect, Fragment } = React;
 
 const SHEET = "https://docs.google.com/spreadsheets/d/13I_UlYHS-7lkY8EYRTVDDSLYXuLXG1MdqzkM-RrX1QQ/edit";
 
-// Crédits par action. Image/audio : valeur figée. Vidéo : crédits par seconde, arrondi sup sur durée.
+// Credits per action. Image/audio: fixed value. Video: credits per second, rounded up by duration.
 const CAT = [
   { f:"Remove Background", sec:"retouche", label:"Remove Background", cr:5 },
   { f:"Expand Image", sec:"retouche", label:"Expand Image", cr:31 },
@@ -224,7 +224,7 @@ const CAT = [
   { f:"Video Generator — Ultra High", sec:"vidGen", label:"Video Generator — Ultra High Quality", vg:344.82758620689657 },
 ];
 const SECTIONS = [
-  { id:"retouche", title:"Quick Tool · Retouche" },
+  { id:"retouche", title:"Quick Tool · Editing" },
   { id:"upImg", title:"Quick Tool · Upscale Image" },
   { id:"upVid", title:"Quick Tool · Upscale Video", dur:"upscale" },
   { id:"genBg", title:"Generative Tool · Generate Background" },
@@ -233,15 +233,15 @@ const SECTIONS = [
   { id:"vidGen", title:"Generative Tool · Video Generator", dur:"gen" },
 ];
 const SCEN = [
-  { k:"fullVideo", label:"Full vidéo", desc:"100% génération vidéo" },
-  { k:"fullImage", label:"Full image", desc:"100% génération d'images" },
-  { k:"fullGen", label:"Full génératif", desc:"Tout le génératif : image, vidéo, fond, audio" },
-  { k:"fullQuick", label:"Full quick", desc:"100% quick tools de retouche" },
-  { k:"mixA", label:"Mix A · léger", desc:"Usage occasionnel, faibles volumes" },
-  { k:"mixB", label:"Mix B · régulier", desc:"Usage régulier, volumes moyens" },
-  { k:"mixC", label:"Mix C · intensif", desc:"Usage intensif, gros volumes" },
+  { k:"fullVideo", label:"Full video", desc:"100% video generation" },
+  { k:"fullImage", label:"Full image", desc:"100% image generation" },
+  { k:"fullGen", label:"Full generative", desc:"All generative: image, video, background, audio" },
+  { k:"fullQuick", label:"Full quick", desc:"100% quick editing tools" },
+  { k:"mixA", label:"Mix A · light", desc:"Occasional use, low volumes" },
+  { k:"mixB", label:"Mix B · regular", desc:"Regular use, medium volumes" },
+  { k:"mixC", label:"Mix C · intensive", desc:"Intensive use, high volumes" },
 ];
-const SCEN_SHORT = ["Full vidéo","Full image","Full génératif","Full quick","Mix Léger","Mix Régulier","Mix Intensif"];
+const SCEN_SHORT = ["Full video","Full image","Full generative","Full quick","Mix Light","Mix Regular","Mix Intensive"];
 const SEED = {
   "Remove Background": [0,0,0,250,80,120,200], "Expand Image": [0,0,0,25,15,25,50],
   "Colorize Image": [0,0,0,18,12,20,40], "Vectorize Image": [0,0,0,10,6,10,20],
@@ -281,7 +281,7 @@ const PLAN_KEYS = ["T", "E", "P", "S"];
 const PLAN_LABEL = { T: "Trial", E: "Essential", P: "Premium", S: "Studio" };
 const RECO = { price: { T: 1.90, E: 19, P: 45, S: 99 }, alloc: { T: 2000, E: 5000, P: 15000, S: 40000 } };
 
-// Zone de calibration : ancrée sur la grille Reco JP. Au delà de ce facteur, M2/M12 saturent (ARPA cible figé).
+// Calibration zone: anchored on the Reco JP grid. Beyond this factor, M2/M12 saturate (fixed target ARPA).
 const REALISM_FACTOR = 3;
 function outOfRealisticZone(price) {
   return ["E", "P", "S"].some((k) => price[k] > RECO.price[k] * REALISM_FACTOR || price[k] < RECO.price[k] / REALISM_FACTOR);
@@ -322,7 +322,7 @@ function SecHeader({ sec, open, onToggle, dur, setDur, colSpan }) {
     <td colSpan={colSpan} className="sticky-l">
       <span className="grp-h"><IcChevron className={"chev" + (open ? " open" : "")} />{sec.title}</span>
       {sec.dur && <span className="grp-dur" onClick={(e) => e.stopPropagation()}>
-        durée réf
+        ref. duration
         <input type="number" className="durin" value={dur[sec.dur]}
           onChange={(e) => setDur((p) => ({ ...p, [sec.dur]: e.target.value === "" ? 0 : parseFloat(e.target.value) }))} /> s
       </span>}
@@ -337,7 +337,7 @@ const ICON = {
   artlist: "data:image/png;base64,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",
 };
 const FX = 1.16; // 1 EUR = 1,16 USD
-// Coût crédits ModifAI par modèle, config la moins chère à 4s (Kling 5s, résolution mini, sans audio)
+// ModifAI credit cost per model, cheapest config at 4s (Kling 5s, min resolution, no audio)
 const OURMODEL = { veo: 690, kling: 483, seedance2: 414, sora: 345, seedance15: 125, gptimg: 9, imagen: 50, nano2: 39, seedream: 31 };
 const OUR_CHEAP_IMG = 9;    // GPT image low 1k
 const OUR_CHEAP_VID = 125;  // Seedance 1.5 fast 4s
@@ -346,7 +346,7 @@ const COMP = {
   higgsfield: {
     label: "Higgsfield",
     icon: "higgsfield", bg: "#e9f7b0", url: "https://higgsfield.ai/pricing",
-    note: "Volumes « jusqu'à » Higgsfield (relevé 19/06/2026, mensuel, vidéos 5s). Deux gammes coexistent (AB test) : cartes Basic/Pro/Max (sliders de crédits, prix promo) et tableau Starter/Plus/Ultra. Volumes par modèle harmonisés sur les coûts crédits du tableau Compare Plans. Nos colonnes ModifAI se calculent en live, config la moins chère à 4s (Kling 5s).",
+    note: "“Up to” volumes from Higgsfield (captured 19/06/2026, monthly, videos at 5s). Two ranges coexist (AB test): Basic/Pro/Max cards (credit sliders, promo prices) and the Starter/Plus/Ultra table. Per-model volumes harmonized on the Compare Plans table credit costs. Our ModifAI columns compute live, cheapest config at 4s (Kling 5s).",
     plans: [
       { id: "basic", name: "Basic", price: 9 },
       { id: "starter", name: "Starter", price: 19 },
@@ -359,12 +359,12 @@ const COMP = {
       { id: "max5400", name: "Max 5400", price: 199 },
     ],
     sections: [
-      { title: "Génération vidéo", rows: [
+      { title: "Video generation", rows: [
         { model: "Seedance 2.0 720p", our: "seedance2", v: { basic: null, starter: null, pro600: 27, pro900: 40, plus: 53, max1800: 80, ultra: 133, max3600: 160, max5400: 239 } },
         { model: "Seedance 2.0 Fast 720p", our: null, v: { basic: 7, starter: 15, pro600: 34, pro900: 51, plus: 68, max1800: 103, ultra: 171, max3600: 205, max5400: 308 } },
         { model: "Kling 3.0 720p", our: "kling", v: { basic: 16, starter: 36, pro600: 80, pro900: 120, plus: 160, max1800: 240, ultra: 400, max3600: 480, max5400: 720 } },
       ] },
-      { title: "Génération image", rows: [
+      { title: "Image generation", rows: [
         { model: "Nano Banana Pro", our: null, v: { basic: 60, starter: 135, pro600: 300, pro900: 450, plus: 600, max1800: 900, ultra: 1500, max3600: 1800, max5400: 2700 } },
         { model: "Nano Banana 2", our: "nano2", v: { basic: 60, starter: 135, pro600: 300, pro900: 450, plus: 600, max1800: 900, ultra: 1500, max3600: 1800, max5400: 2700 } },
         { model: "Nano Banana", our: null, v: { basic: 120, starter: 270, pro600: 600, pro900: 900, plus: 1200, max1800: 1800, ultra: 3000, max3600: 3600, max5400: 5400 } },
@@ -383,7 +383,7 @@ const COMP = {
     magnific: {
     label: "Magnific",
     icon: "magnific", bg: "#e6e7ea", url: "https://www.magnific.com/pricing",
-    note: "Volumes « jusqu'à » de la page Magnific (relevé du 18/06/2026, mensuel), vidéos calées sur 3s. Prix des 4 plans vérifiés (grille Freepik). La colonne Pro (230€) reste une lecture de leur table comparée. Nos colonnes se calculent en live, config la moins chère à 4s.",
+    note: "“Up to” volumes from the Magnific page (captured 18/06/2026, monthly), videos set at 3s. The 4 plan prices verified (Freepik grid). The Pro column (230€) is a reading of their comparison table. Our columns compute live, cheapest config at 4s.",
     plans: [
       { id: "e", name: "Essential", price: 8 },
       { id: "p", name: "Premium", price: 16 },
@@ -391,7 +391,7 @@ const COMP = {
       { id: "pro", name: "Pro", price: 230 },
     ],
     sections: [
-      { title: "Génération vidéo", rows: [
+      { title: "Video generation", rows: [
         { model: "Kling 3.0 4K", our: "kling", v: { e: 6, p: 16, pp: 37, pro: 250 } },
         { model: "Kling 3.0 Motion Control Pro", our: null, v: { e: 17, p: 44, pp: 100, pro: 666 } },
         { model: "Seedance 2.0 720p", our: "seedance2", v: { e: 7, p: 17, pp: 39, pro: 285 } },
@@ -407,7 +407,7 @@ const COMP = {
         { model: "MiniMax Hailuo 2.3 Fast 768p", our: null, v: { e: 53, p: 133, pp: "∞", pro: "∞" } },
         { model: "Kling 2.5 720p", our: null, v: { e: 57, p: 142, pp: "∞", pro: "∞" } },
       ] },
-      { title: "Génération image", rows: [
+      { title: "Image generation", rows: [
         { model: "Nano Banana 2 1K", our: "nano2", v: { e: 106, p: 266, pp: "∞", pro: "∞" } },
         { model: "Nano Banana 2 4K", our: null, v: { e: 53, p: 133, pp: 300, pro: 2000 } },
         { model: "Nano Banana Pro (1K/2K)", our: null, v: { e: 106, p: 266, pp: 600, pro: 2000 } },
@@ -425,7 +425,7 @@ const COMP = {
   artlist: {
     label: "Artlist",
     icon: "artlist", bg: "#fef0c3", url: "https://artlist.io/page/pricing/max?tab=ai-suite",
-    note: "Artlist ne détaille pas par modèle : comparatif global « jusqu'à » (relevé du 18/06/2026, mensuel). Volumes calés sur les paliers Starter publiés (10 cr/image, 80 cr/vidéo), prorata pour Creator et Professional. Le plan Voiceover (voix only) figure dans la liste mais hors comparatif image/vidéo. Nos colonnes se calculent en live sur notre modèle le moins cher.",
+    note: "Artlist does not break down by model: global “up to” comparison (captured 18/06/2026, monthly). Volumes based on the published Starter tiers (10 cr/image, 80 cr/video), prorated for Creator and Professional. The Voiceover plan (voice only) is listed but outside the image/video comparison. Our columns compute live on our cheapest model.",
     global: true,
     plans: [
       { id: "voice", name: "AI Voiceover", price: 15.99, hideUsage: true },
@@ -439,8 +439,8 @@ const COMP = {
       { id: "p15", name: "AI Professional", price: 1199.99, img: 150000, vid: 18750 },
     ],
     rows: [
-      { model: "Images (jusqu'à)", kind: "img" },
-      { model: "Vidéos (jusqu'à)", kind: "vid" },
+      { model: "Images (up to)", kind: "img" },
+      { model: "Videos (up to)", kind: "vid" },
     ],
   },
 };
@@ -457,7 +457,7 @@ function CompView({ comp, compKey, compSel, setCompSel, price, alloc, vatMode })
   const ours = (modelKey, planKey) => { const c = OURMODEL[modelKey]; return c ? Math.floor(alloc[planKey] / c) : null; };
   const oursGlobal = (kind, planKey) => Math.floor(alloc[planKey] / (kind === "img" ? OUR_CHEAP_IMG : OUR_CHEAP_VID));
 
-  // Sélection des plans concurrent par colonne : Auto (plan le plus proche en prix) ou Manuel (choix utilisateur)
+  // Competitor plan selection per column: Auto (closest plan by price) or Manual (user choice)
   const pool = comp.plans.filter((p) => !p.hideUsage);
   const pick = (htv) => pool.reduce((best, p) => (Math.abs(p.price - htv) < Math.abs(best.price - htv) ? p : best), pool[0]);
   const autoPick = { E: pick(htOf(price.E)), P: pick(htOf(price.P)), S: pick(htOf(price.S)) };
@@ -499,7 +499,7 @@ function CompView({ comp, compKey, compSel, setCompSel, price, alloc, vatMode })
         <tr className="compsec"><td colSpan={7}>{sec.title}</td></tr>
         {sec.rows.map(renderRow)}
       </Fragment>)}
-      {extraSecs.length > 0 && <tr className="compgroup"><td colSpan={7}>Aussi proposés par {comp.label}, pas encore chez ModifAI<span className="cghint">Veille concurrence et pistes d'intégration pour l'équipe API</span></td></tr>}
+      {extraSecs.length > 0 && <tr className="compgroup"><td colSpan={7}>Also offered by {comp.label}, not yet on ModifAI<span className="cghint">Competitive watch and integration ideas for the API team</span></td></tr>}
       {extraSecs.map((sec) => <Fragment key={"e" + sec.title}>
         <tr className="compsec sub"><td colSpan={7}>{sec.title}</td></tr>
         {sec.rows.map(renderRow)}
@@ -514,19 +514,19 @@ function CompView({ comp, compKey, compSel, setCompSel, price, alloc, vatMode })
     <div className="stickyhead"><table>
       <thead>
         <tr className="brandrow">
-          <th className="l corner">Volumes par plan</th>
+          <th className="l corner">Volumes per plan</th>
           <th className="us" colSpan={3}>
             <span className="brandcell"><img className="brandico" src={ICON.modifai} alt="" />ModifAI</span>
           </th>
           <th className="them sep" colSpan={3} style={{ background: comp.bg }}>
             <span className="brandcell"><img className="brandico" src={ICON[comp.icon]} alt="" />{comp.label}
-              <a className="pricelink" href={comp.url} target="_blank" rel="noopener noreferrer" title="Voir la page de pricing">↗</a>
-              <button className={"automode" + (auto ? " on" : "")} onClick={() => setAuto(!auto)} title={auto ? "Auto : chaque colonne affiche le plan le plus proche de votre prix. Cliquez pour choisir manuellement." : "Manuel : vous choisissez chaque plan. Cliquez pour revenir au plan le plus proche de votre prix."}>{auto ? "Auto" : "Manuel"}</button>
+              <a className="pricelink" href={comp.url} target="_blank" rel="noopener noreferrer" title="View the pricing page">↗</a>
+              <button className={"automode" + (auto ? " on" : "")} onClick={() => setAuto(!auto)} title={auto ? "Auto: each column shows the plan closest to your price. Click to choose manually." : "Manual: you pick each plan. Click to return to the plan closest to your price."}>{auto ? "Auto" : "Manual"}</button>
             </span>
           </th>
         </tr>
         <tr className="planrow">
-          <th className="l modelhead">Modèle</th>
+          <th className="l modelhead">Model</th>
           {PLAN3.map((k) => <th key={k} className="us">
             <span className="planname">{LBL[k]}</span><span className="bigprice">{fMoney(dispOur(price[k], vatMode))}€</span>
           </th>)}
@@ -542,18 +542,18 @@ function CompView({ comp, compKey, compSel, setCompSel, price, alloc, vatMode })
     </table></div>
 
     <div className="planref">
-      <div className="prtitle">Tous les plans {comp.label} (mensuel, {vatMode})<span className="prhint">surlignés = comparés à vos plans actuels</span></div>
+      <div className="prtitle">All {comp.label} plans (monthly, {vatMode === "TTC" ? "Incl. VAT" : "Excl. VAT"})<span className="prhint">highlighted = compared to your current plans</span></div>
       <div className="prgrid">
         {allSorted.map((p) => <div key={p.id} className={"prchip" + (pickedSet.has(p) ? " on" : "")}>
           <span className="prname">{p.name}</span><span className="prprice">{fMoney(dispComp(p.price, vatMode))}€</span>
         </div>)}
       </div>
       <p className="prnote">{vatMode === "TTC"
-        ? "Tarifs concurrents convertis en TTC (TVA 20% estimée, marché EU). Catalogues affichés en HT sur leurs sites."
-        : "Tarifs concurrents en HT (catalogue). Vos prix convertis en HT depuis le TTC saisi."}</p>
+        ? "Competitor prices converted to incl. VAT (20% VAT estimated, EU market). Catalogs shown excl. VAT on their sites."
+        : "Competitor prices excl. VAT (catalog). Your prices converted to excl. VAT from the entered incl.-VAT price."}</p>
     </div>
 
-    <p className="legend">Tous les volumes sont des maxima « jusqu'à » (réglages les plus bas). ✕ = modèle non proposé. ∞ = illimité annoncé. En mode Auto, chaque colonne concurrent affiche le plan le plus proche de votre prix ; passez en Manuel (en-tête du concurrent) pour choisir librement chaque plan via les menus déroulants. Les volumes ModifAI se recalculent en live selon les jetons.</p>
+    <p className="legend">All volumes are “up to” maxima (lowest settings). ✕ = model not offered. ∞ = unlimited as advertised. In Auto mode, each competitor column shows the plan closest to your price; switch to Manual (competitor header) to freely pick each plan via the dropdowns. ModifAI volumes recompute live based on credits.</p>
   </div>;
 }
 
@@ -578,15 +578,15 @@ function App() {
   const applyReco = () => { setPrice({ ...RECO.price }); setAlloc({ ...RECO.alloc }); };
   return <div className="page">
     <div className="console"><div className="console-inner">
-      <div className="brand"><b>ModifAI</b><span className="sub">Arbitrage crédits</span></div>
+      <div className="brand"><b>ModifAI</b><span className="sub">Pricing &amp; Credits Cockpit</span></div>
       <div className="cols">
         <div className="panel volpanel">
           <div className="panel-h">
-            <span className="ph-title"><IcSliders style={{width:14,height:14}}/> Prix &amp; jetons par plan <Tip text={"Prix affiché aux utilisateurs et jetons inclus, par plan. Bascule HT/TTC applicable partout. La rentabilité se calcule toujours sur le HT (TTC / 1,2)."} /></span>
+            <span className="ph-title"><IcSliders style={{width:14,height:14}}/> Price &amp; credits per plan <Tip text={"Price shown to users and credits included, per plan. The incl./excl. VAT toggle applies everywhere. Profitability is always computed on the excl.-VAT price (incl. VAT / 1.2)."} /></span>
             <div className="ph-right">
               <div className="vatseg">
-                <button className={"vatopt" + (vatMode === "TTC" ? " on" : "")} onClick={() => setVatMode("TTC")}>TTC</button>
-                <button className={"vatopt" + (vatMode === "HT" ? " on" : "")} onClick={() => setVatMode("HT")}>HT</button>
+                <button className={"vatopt" + (vatMode === "TTC" ? " on" : "")} onClick={() => setVatMode("TTC")}>Incl. VAT</button>
+                <button className={"vatopt" + (vatMode === "HT" ? " on" : "")} onClick={() => setVatMode("HT")}>Excl. VAT</button>
               </div>
               <button className={"recobtn" + (isReco ? " on" : "")} onClick={applyReco}>{isReco ? "✓ Reco JP" : "Reco JP"}</button>
             </div>
@@ -595,36 +595,36 @@ function App() {
             <div>
               <div className="minis">{PLAN_KEYS.map((k) => <div className="pcol" key={k}>
                 <div className="pcol-h">{PLAN_LABEL[k]}</div>
-                <label className="fld"><span>Prix {vatMode} (€)</span><Num value={vatMode === "TTC" ? price[k] : Math.round(htOf(price[k]) * 100) / 100} step={k === "T" ? 0.1 : (vatMode === "HT" ? 0.01 : 1)} onChange={(v) => setPrice((p) => ({ ...p, [k]: vatMode === "TTC" ? v : ttcOf(v) }))} /></label>
-                <label className="fld"><span>Jetons</span><Num value={alloc[k]} step={500} onChange={(v) => setAlloc((p) => ({ ...p, [k]: v }))} /></label>
+                <label className="fld"><span>Price {vatMode === "TTC" ? "Incl. VAT" : "Excl. VAT"} (€)</span><Num value={vatMode === "TTC" ? price[k] : Math.round(htOf(price[k]) * 100) / 100} step={k === "T" ? 0.1 : (vatMode === "HT" ? 0.01 : 1)} onChange={(v) => setPrice((p) => ({ ...p, [k]: vatMode === "TTC" ? v : ttcOf(v) }))} /></label>
+                <label className="fld"><span>Credits</span><Num value={alloc[k]} step={500} onChange={(v) => setAlloc((p) => ({ ...p, [k]: v }))} /></label>
               </div>)}</div>
             </div>
           </div>
         </div>
         <div className="panel rentapanel">
           <div className="renta-head">
-            <span className="renta-title">Rentabilité <Tip text={"Multiple net par euro investi en acquisition. Basé sur la modélisation économique des nouvelles offres (pricing plans, CPA, répartition des plans...).\nRéagit aux prix et aux volumes de crédits.\nSous-évalué car ne prend pas en compte les achats d'Extra Crédits, difficiles à anticiper."} /></span>
-            <a className="renta-link" href={SHEET} target="_blank" rel="noopener">Baseline &amp; détail ↗</a>
+            <span className="renta-title">Profitability <Tip text={"Net multiple per euro invested in acquisition. Based on the economic model of the new plans (pricing, CPA, plan mix...).\nReacts to prices and credit volumes.\nUnderstated since it does not account for Extra Credits purchases, which are hard to anticipate."} /></span>
+            <a className="renta-link" href={SHEET} target="_blank" rel="noopener">Baseline &amp; details ↗</a>
           </div>
           <div className="renta-tiles">
             {["M0", "M2", "M12"].map((h) => {
               const v = mult[h];
               return <div className={"rcard " + rclass(h, v)} key={h}>
-                <div className="rlabel">Multiple net {h}</div>
+                <div className="rlabel">Net multiple {h}</div>
                 <div className="rvalue">{fMul(v)}</div>
               </div>;
             })}
           </div>
-          {outOfZone && <div className="zone-alert"><b>⚠️ Hors zone de calibration.</b> Les multiples M2 et M12 reposent sur un ARPA cible figé, établi par l'équipe data sur données réelles. Le prix saisi n'agit que sur le coût, jamais sur ce revenu de référence : au delà d'une fourchette réaliste, M2 et M12 saturent vers leur plafond et ne sont plus interprétables. Seul M0 suit le prix, mais il ne capte que le cash encaissé à l'acquisition.</div>}
-          <p className="renta-note">Hors Extra Credits : leurs achats ne sont pas comptés ici et remonteront la rentabilité réelle.</p>
+          {outOfZone && <div className="zone-alert"><b>⚠️ Outside the calibration zone.</b> The M2 and M12 multiples rely on a fixed target ARPA, set by the data team from real data. The entered price only affects cost, never this reference revenue: beyond a realistic range, M2 and M12 saturate toward their ceiling and are no longer meaningful. Only M0 follows price, but it captures only the cash collected at acquisition.</div>}
+          <p className="renta-note">Excluding Extra Credits: their purchases are not counted here and will raise actual profitability.</p>
         </div>
       </div>
     </div></div>
 
     <div className="wrap">
       <div className="tabs">
-        <button className={"tab" + (tab === "equiv" ? " active" : "")} onClick={() => setTab("equiv")}><IcLayers style={{width:16,height:16}}/> Équivalences</button>
-        <button className={"tab" + (tab === "scen" ? " active" : "")} onClick={() => setTab("scen")}><IcBoxes style={{width:16,height:16}}/> Scénarios d'usage</button>
+        <button className={"tab" + (tab === "equiv" ? " active" : "")} onClick={() => setTab("equiv")}><IcLayers style={{width:16,height:16}}/> Equivalences</button>
+        <button className={"tab" + (tab === "scen" ? " active" : "")} onClick={() => setTab("scen")}><IcBoxes style={{width:16,height:16}}/> Usage scenarios</button>
         <button className={"tab" + (tab === "higgsfield" ? " active" : "")} onClick={() => setTab("higgsfield")}>vs Higgsfield</button>
         <button className={"tab" + (tab === "magnific" ? " active" : "")} onClick={() => setTab("magnific")}>vs Magnific</button>
         <button className={"tab" + (tab === "artlist" ? " active" : "")} onClick={() => setTab("artlist")}>vs Artlist</button>
@@ -639,7 +639,7 @@ function App() {
 
 function Equiv({ credits, alloc, dur, setDur, open, toggle }) {
   return <div className="stickyhead"><table>
-    <thead><tr><th className="l">Action</th><th>Crédits / action</th>
+    <thead><tr><th className="l">Action</th><th>Credits / action</th>
       {PLAN_KEYS.map((k) => <th key={k}>{PLAN_LABEL[k]}<div className="sub2">{fInt(alloc[k])} cr.</div></th>)}</tr></thead>
     <tbody>
       {SECTIONS.map((sec) => <Fragment key={sec.id}>
@@ -655,25 +655,25 @@ function Equiv({ credits, alloc, dur, setDur, open, toggle }) {
 
 function pctClass(p) { return p <= 1 ? "ok" : p <= 1.5 ? "warn" : "over"; }
 function verdict(total, alloc) {
-  if (total <= alloc.E) return { t: "Plan minimum : Essential", c: "#2563eb" };
-  if (total <= alloc.P) return { t: "Plan minimum : Premium", c: "#2563eb" };
-  if (total <= alloc.S) return { t: "Plan minimum : Studio", c: "#2563eb" };
-  return { t: "Dépasse Studio", c: "#e11d48" };
+  if (total <= alloc.E) return { t: "Minimum plan: Essential", c: "#2563eb" };
+  if (total <= alloc.P) return { t: "Minimum plan: Premium", c: "#2563eb" };
+  if (total <= alloc.S) return { t: "Minimum plan: Studio", c: "#2563eb" };
+  return { t: "Exceeds Studio", c: "#e11d48" };
 }
 function Scenarios({ credits, qty, setQ, totals, alloc, dur, setDur, open, toggle, resetQty }) {
   const ncol = 2 + SCEN.length;
   return <div>
-    <p className="scards-intro">Chaque panier correspond à un profil d'usage type, les consommations étant modifiables. Permet de matcher les profils avec les plans.</p>
+    <p className="scards-intro">Each basket matches a typical usage profile; consumption is editable. Lets you match profiles to plans.</p>
     <div className="scards">{SCEN.map((s, i) => { const v = verdict(totals[i], alloc);
       return <div className="scard" key={s.k}>
         <div className="t">{s.label}</div>
         <div className="sdesc">{s.desc}</div>
-        <div className="v">{fInt(totals[i])} <span className="vu2">cr/mois</span></div>
+        <div className="v">{fInt(totals[i])} <span className="vu2">cr/month</span></div>
         <div className="vd" style={{ color: v.c }}>{v.t}</div>
       </div>; })}
     </div>
     <div className="stickyhead"><table>
-      <thead><tr><th className="l sticky-l">Action <button className="resetbtn" onClick={resetQty} title="Remettre toutes les quantités au scénario de base"><IcReset style={{width:12,height:12}}/> Réinitialiser</button></th><th>Cr./action</th>
+      <thead><tr><th className="l sticky-l">Action <button className="resetbtn" onClick={resetQty} title="Reset all quantities to the base scenario"><IcReset style={{width:12,height:12}}/> Reset</button></th><th>Cr./action</th>
         {SCEN.map((s) => <th key={s.k}>{s.label}</th>)}</tr></thead>
       <tbody>
         {SECTIONS.map((sec) => <Fragment key={sec.id}>
@@ -685,10 +685,10 @@ function Scenarios({ credits, qty, setQ, totals, alloc, dur, setDur, open, toggl
         </Fragment>)}
       </tbody>
       <tfoot>
-        <tr className="tot"><td className="l sticky-l">Total crédits / mois consommés</td><td></td>
+        <tr className="tot"><td className="l sticky-l">Total credits / month consumed</td><td></td>
           {totals.map((t, i) => <td key={i} className="mono">{fInt(t)}</td>)}</tr>
         <tr>
-          <td className="footlabel sticky-l" style={{background:"#f1f5f9"}}>Remplissage du quota mensuel par plan</td>
+          <td className="footlabel sticky-l" style={{background:"#f1f5f9"}}>Monthly quota fill per plan</td>
           <td className="profcell"></td>
           {SCEN.map((s, i) => <td key={s.k} className="profcell">{SCEN_SHORT[i]}</td>)}
         </tr>
@@ -698,7 +698,7 @@ function Scenarios({ credits, qty, setQ, totals, alloc, dur, setDur, open, toggl
         </tr>)}
       </tfoot>
     </table></div>
-    <p className="legend">Remplissage = part du quota mensuel du plan consommée par le panier. Vert : tient dans le plan (≤ 100 %). Ambre : dépasse jusqu'à 150 %. Rouge : au-delà.</p>
+    <p className="legend">Fill = share of the plan's monthly quota consumed by the basket. Green: fits within the plan (≤ 100%). Amber: exceeds up to 150%. Red: beyond.</p>
   </div>;
 }
 
