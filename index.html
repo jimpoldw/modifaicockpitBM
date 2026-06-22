@@ -308,6 +308,7 @@ const IcInfo = (p) => <Svg {...p}><circle cx="12" cy="12" r="10"/><path d="M12 1
 const IcSliders = (p) => <Svg {...p}><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></Svg>;
 const IcLayers = (p) => <Svg {...p}><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></Svg>;
 const IcBoxes = (p) => <Svg {...p}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></Svg>;
+const IcTag = (p) => <Svg {...p}><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1.5"/></Svg>;
 const IcChevron = (p) => <Svg {...p}><path d="m9 18 6-6-6-6"/></Svg>;
 const IcReset = (p) => <Svg {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></Svg>;
 
@@ -672,7 +673,7 @@ function ForPricing({ alloc, price }) {
     </table></div>
     <p className="legend">Indicative maximums (“up to”), based on the lightest settings (cheapest config, short clips). Actual volumes vary with model and quality.</p>
     <div className="roadmap">
-      <div className="roadmap-h">Coming soon · Integration roadmap</div>
+      <div className="roadmap-h">Missing API</div>
       <p className="roadmap-sub">Models offered by competitors or trending on the market, not yet on ModifAI. Indicative pool for future integrations.</p>
       {ROADMAP.map((g) => <div className="rm-group" key={g.title}>
         <div className="rm-gtitle">{g.title}</div>
@@ -752,7 +753,7 @@ function App() {
       <div className="tabs">
         <button className={"tab" + (tab === "equiv" ? " active" : "")} onClick={() => setTab("equiv")}><IcLayers style={{width:16,height:16}}/> Equivalences</button>
         <button className={"tab" + (tab === "scen" ? " active" : "")} onClick={() => setTab("scen")}><IcBoxes style={{width:16,height:16}}/> Usage scenarios</button>
-        <button className={"tab" + (tab === "pricing" ? " active" : "")} onClick={() => setTab("pricing")}>For Pricing</button>
+        <button className={"tab" + (tab === "pricing" ? " active" : "")} onClick={() => setTab("pricing")}><IcTag style={{width:16,height:16}}/> For Pricing</button>
         <button className={"tab" + (tab === "higgsfield" ? " active" : "")} onClick={() => setTab("higgsfield")}>vs Higgsfield</button>
         <button className={"tab" + (tab === "magnific" ? " active" : "")} onClick={() => setTab("magnific")}>vs Magnific</button>
         <button className={"tab" + (tab === "artlist" ? " active" : "")} onClick={() => setTab("artlist")}>vs Artlist</button>
