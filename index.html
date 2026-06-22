@@ -124,6 +124,22 @@ thead .sticky-l,tfoot .sticky-l{background:#f8fafc}
 .scard .vu2{font-size:10px;color:#94a3b8;font-weight:400;font-family:ui-sans-serif,system-ui,sans-serif}
 .scard .vd{font-size:11px;font-weight:600;margin-top:6px;padding-top:6px;border-top:1px solid #f1f5f9}
 .legend{font-size:11px;color:#94a3b8;margin-top:8px}
+.stickyhead .pricetbl{min-width:560px}
+.pricetbl thead .planrow2 th{position:sticky;top:0;z-index:20;background:#f8fafc;box-shadow:inset 0 -1px 0 #e2e8f0;text-align:center;padding:12px 18px}
+.pricetbl thead .planrow2 th.corner2{text-align:left;z-index:21;font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;vertical-align:middle}
+.planhd .pname{font-size:14px;font-weight:700;color:#0f172a}
+.planhd .pprice{font-size:13px;font-weight:600;color:#6366f1;margin-top:2px}
+.prow td.l{padding:9px 16px;color:#334155}
+.prow:hover td{background:#fafbff}
+.upcell{text-align:center;font-size:13px;color:#334155;font-variant-numeric:tabular-nums}
+.roadmap{margin-top:22px;padding:16px 18px;background:#f8fafc;border:1px dashed #c7d2fe;border-radius:12px}
+.roadmap-h{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6366f1}
+.roadmap-sub{font-size:11px;color:#94a3b8;margin:4px 0 12px}
+.rm-group{margin-top:12px}
+.rm-gtitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#475569;margin-bottom:7px}
+.rm-chips{display:flex;flex-wrap:wrap;gap:7px}
+.rm-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:#fff;border:1px solid #e2e8f0;border-radius:999px;font-size:12px;color:#334155}
+.rm-src{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:#a3aab8;border-left:1px solid #e2e8f0;padding-left:6px}
 .pagefoot{max-width:1280px;margin:0 auto;padding:32px 16px 88px}
 tfoot .scenhead td{font-size:10px;color:#64748b;text-align:right;white-space:nowrap;padding:6px 16px;font-weight:600}
 tfoot .scenhead .sticky-l{background:#fff}
@@ -557,6 +573,117 @@ function CompView({ comp, compKey, compSel, setCompSel, price, alloc, vatMode })
   </div>;
 }
 
+function niceFloor(n) {
+  if (!isFinite(n) || n <= 0) return 0;
+  n = Math.floor(n);
+  if (n < 100) return n;
+  const mag = Math.pow(10, Math.floor(Math.log10(n)) - 1);
+  return Math.floor(n / mag) * mag;
+}
+const nEN = (n) => n.toLocaleString("en-US");
+
+function ForPricing({ alloc, price }) {
+  const [openP, setOpenP] = useState({ video: true, image: true, audio: true, editing: true });
+  const tgP = (id) => setOpenP((p) => ({ ...p, [id]: !p[id] }));
+  const P3 = ["E", "P", "S"];
+  const PNAME = { E: "Essential", P: "Premium", S: "Studio" };
+  // Editing/Audio costs pulled live from CAT. Upscale Video: cheapest (Low) over a 10s reference clip.
+  const catCost = (f) => { const c = CAT.find((x) => x.f === f); return c ? (c.vu ? Math.ceil(c.vu * 10) : c.cr) : 0; };
+  const SECT = [
+    { id: "video", title: "AI Video", rows: [
+      { name: "Seedance Fast", cost: OURMODEL.seedance15 },
+      { name: "Sora", cost: OURMODEL.sora },
+      { name: "Seedance 2.0", cost: OURMODEL.seedance2 },
+      { name: "Kling", cost: OURMODEL.kling },
+      { name: "Veo", cost: OURMODEL.veo },
+    ] },
+    { id: "image", title: "AI Image", rows: [
+      { name: "GPT Image", cost: OURMODEL.gptimg },
+      { name: "Seedream", cost: OURMODEL.seedream },
+      { name: "Nano Banana 2", cost: OURMODEL.nano2 },
+      { name: "Imagen", cost: OURMODEL.imagen },
+    ] },
+    { id: "audio", title: "AI Audio", rows: [
+      { name: "Text to Speech (ElevenLabs)", sub: "per 1,000 characters", cost: catCost("Text to Speech") },
+    ] },
+    { id: "editing", title: "AI Editing", rows: [
+      { name: "Upscale Image", cost: catCost("Upscale Image — Low") },
+      { name: "Upscale Video", cost: catCost("Upscale Video — Low") },
+      { name: "Remove Background", cost: catCost("Remove Background") },
+      { name: "Expand Image", cost: catCost("Expand Image") },
+      { name: "Vectorize Image", cost: catCost("Vectorize Image") },
+      { name: "Colorize Image", cost: catCost("Colorize Image") },
+    ] },
+  ];
+  const cap = (cost, k) => niceFloor(alloc[k] / cost);
+  const ROADMAP = [
+    { title: "AI Video", models: [
+      { n: "Runway Gen-4.5", s: "Magnific" },
+      { n: "Luma Ray 3", s: "Market" },
+      { n: "PixVerse V6", s: "Magnific" },
+      { n: "MiniMax Hailuo 2.3", s: "Magnific" },
+      { n: "Wan 2.7", s: "Magnific" },
+      { n: "LTX-2", s: "Market" },
+      { n: "HunyuanVideo 1.5", s: "Market" },
+      { n: "HappyHorse 1.0", s: "Magnific" },
+      { n: "Seedance 1.5 Pro", s: "Magnific" },
+      { n: "Grok Imagine 1.5", s: "Magnific" },
+      { n: "Pika 2.2", s: "Market" },
+    ] },
+    { title: "AI Image", models: [
+      { n: "Nano Banana Pro", s: "Higgsfield, Magnific" },
+      { n: "FLUX.2 Pro", s: "Higgsfield, Magnific" },
+      { n: "Midjourney v7", s: "Market" },
+      { n: "Ideogram 3.0", s: "Market" },
+      { n: "Recraft V4", s: "Magnific" },
+      { n: "Adobe Firefly Image 4", s: "Market" },
+      { n: "Reve", s: "Higgsfield" },
+      { n: "Stable Diffusion 3.5", s: "Market" },
+    ] },
+    { title: "AI Audio", models: [
+      { n: "Suno v5", s: "Market" },
+      { n: "Udio", s: "Market" },
+      { n: "Stable Audio", s: "Market" },
+    ] },
+  ];
+  return <div>
+    <p className="scards-intro">Preview of the Compare Plans section for the pricing page. Indicative volumes per plan, recalculated live from the credits set in the console.</p>
+    <div className="stickyhead"><table className="pricetbl">
+      <thead>
+        <tr className="planrow2">
+          <th className="l corner2">Plans</th>
+          {P3.map((k) => <th key={k} className="planhd">
+            <div className="pname">{PNAME[k]}</div>
+            <div className="pprice">€{fMoney(price[k])}</div>
+          </th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {SECT.map((sec) => <Fragment key={sec.id}>
+          <tr className="grp" onClick={() => tgP(sec.id)}>
+            <td colSpan={4}><span className="grp-h"><IcChevron className={"chev" + (openP[sec.id] ? " open" : "")} />{sec.title}</span></td>
+          </tr>
+          {openP[sec.id] && sec.rows.map((r) => <tr key={r.name} className="prow">
+            <td className="l">{r.name}{r.sub && <span className="sub2"> · {r.sub}</span>}</td>
+            {P3.map((k) => <td key={k} className="upcell">Up to {nEN(cap(r.cost, k))}</td>)}
+          </tr>)}
+        </Fragment>)}
+      </tbody>
+    </table></div>
+    <p className="legend">Indicative maximums (“up to”), based on the lightest settings (cheapest config, short clips). Actual volumes vary with model and quality.</p>
+    <div className="roadmap">
+      <div className="roadmap-h">Coming soon · Integration roadmap</div>
+      <p className="roadmap-sub">Models offered by competitors or trending on the market, not yet on ModifAI. Indicative pool for future integrations.</p>
+      {ROADMAP.map((g) => <div className="rm-group" key={g.title}>
+        <div className="rm-gtitle">{g.title}</div>
+        <div className="rm-chips">
+          {g.models.map((m) => <span className="rm-chip" key={m.n}>{m.n}<span className="rm-src">{m.s}</span></span>)}
+        </div>
+      </div>)}
+    </div>
+  </div>;
+}
+
 function App() {
   const [alloc, setAlloc] = useState({ ...RECO.alloc });
   const [price, setPrice] = useState({ ...RECO.price });
@@ -625,12 +752,14 @@ function App() {
       <div className="tabs">
         <button className={"tab" + (tab === "equiv" ? " active" : "")} onClick={() => setTab("equiv")}><IcLayers style={{width:16,height:16}}/> Equivalences</button>
         <button className={"tab" + (tab === "scen" ? " active" : "")} onClick={() => setTab("scen")}><IcBoxes style={{width:16,height:16}}/> Usage scenarios</button>
+        <button className={"tab" + (tab === "pricing" ? " active" : "")} onClick={() => setTab("pricing")}>For Pricing</button>
         <button className={"tab" + (tab === "higgsfield" ? " active" : "")} onClick={() => setTab("higgsfield")}>vs Higgsfield</button>
         <button className={"tab" + (tab === "magnific" ? " active" : "")} onClick={() => setTab("magnific")}>vs Magnific</button>
         <button className={"tab" + (tab === "artlist" ? " active" : "")} onClick={() => setTab("artlist")}>vs Artlist</button>
       </div>
       {tab === "equiv" && <Equiv credits={credits} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} />}
       {tab === "scen" && <Scenarios credits={credits} qty={qty} setQ={setQ} totals={totals} alloc={alloc} dur={dur} setDur={setDur} open={open} toggle={toggle} resetQty={resetQty} />}
+      {tab === "pricing" && <ForPricing alloc={alloc} price={price} />}
       {COMP[tab] && <CompView comp={COMP[tab]} compKey={tab} compSel={compSel} setCompSel={setCompSel} price={price} alloc={alloc} vatMode={vatMode} />}
     </div>
     <div className="pagefoot"></div>
