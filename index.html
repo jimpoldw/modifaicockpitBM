@@ -277,7 +277,7 @@ const htOf = (ttc) => ttc / (1 + TVA);
 const REV = { T: 0.036, P: 0.022 };
 const RBASE = { M2: 1.08, M12: 2 };
 const CW = {
-  T: { M0: 2.2e-8, M2: 2.2e-8, M12: 2.2e-8 },
+  T: { M0: 1.76e-8, M2: 1.76e-8, M12: 1.76e-8 },
   E: { M0: 6.05e-10, M2: 8.91e-10, M12: 1.2184951357361314e-9 },
   P: { M0: 1.089e-8, M2: 1.6038e-8, M12: 2.1932912443250363e-8 },
   S: { M0: 4.99125e-10, M2: 7.35075e-10, M12: 1.0052584869973084e-9 },
@@ -295,7 +295,7 @@ const fMoney = (v) => { if (!isFinite(v)) return "—"; const r = Math.round(v *
 
 const PLAN_KEYS = ["T", "E", "P", "S"];
 const PLAN_LABEL = { T: "Trial", E: "Essential", P: "Premium", S: "Studio" };
-const RECO = { price: { T: 1.90, E: 19, P: 45, S: 99 }, alloc: { T: 2000, E: 5000, P: 15000, S: 40000 } };
+const RECO = { price: { T: 1.90, E: 19, P: 45, S: 99 }, alloc: { T: 2500, E: 5000, P: 15000, S: 40000 } };
 
 // Calibration zone: anchored on the Reco JP grid. Beyond this factor, M2/M12 saturate (fixed target ARPA).
 const REALISM_FACTOR = 3;
